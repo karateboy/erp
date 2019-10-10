@@ -55,16 +55,16 @@
 <style scoped>
 </style>
 <script>
-import moment from "moment";
-import config from "@/config";
+import moment from 'moment';
+import config from '@/config';
+
+import { getMonitors, getMonitorTypes, getHistoryData } from '@/api/data';
 const baseUrl =
-  process.env.NODE_ENV === "development"
+  process.env.NODE_ENV === 'development'
     ? config.baseUrl.dev
     : config.baseUrl.pro;
-
-import { getMonitors, getMonitorTypes, getHistoryData } from "@/api/data";
 export default {
-  name: "historyData",
+  name: 'historyData',
   mounted() {
     getMonitors()
       .then(resp => {
@@ -93,11 +93,11 @@ export default {
       monitorList: [],
       monitorTypeList: [],
       formItem: {
-        monitor: "",
+        monitor: '',
         monitorTypes: [],
         dateRange: [
           moment()
-            .subtract(2, "days")
+            .subtract(2, 'days')
             .toDate(),
           moment().toDate()
         ],
@@ -108,34 +108,34 @@ export default {
         monitor: [
           {
             required: true,
-            type: "string",
+            type: 'string',
             min: 1,
-            message: "請選擇通道",
-            trigger: "change"
+            message: '請選擇通道',
+            trigger: 'change'
           }
         ],
         monitorTypes: [
           {
             required: true,
-            type: "array",
+            type: 'array',
             min: 1,
-            message: "至少選擇一個測項",
-            trigger: "change"
+            message: '至少選擇一個測項',
+            trigger: 'change'
           }
         ],
         dateRange: [
           {
             required: true,
-            type: "array",
+            type: 'array',
             min: 2,
-            message: "請選擇資料範圍",
-            trigger: "change"
+            message: '請選擇資料範圍',
+            trigger: 'change'
           }
         ]
       },
       display: false,
       showPdf: false,
-      pdfUrl: "",
+      pdfUrl: '',
       columns: [],
       rows: []
     };
@@ -155,7 +155,7 @@ export default {
       this.formItem.end = this.formItem.dateRange[1].getTime();
       getHistoryData({
         monitor: this.formItem.monitor,
-        monitorTypes: encodeURIComponent(this.formItem.monitorTypes.join(",")),
+        monitorTypes: encodeURIComponent(this.formItem.monitorTypes.join(',')),
         start: this.formItem.start,
         end: this.formItem.end
       })
@@ -164,8 +164,8 @@ export default {
           this.columns.splice(0, this.columns.length);
           this.rows.splice(0, this.rows.length);
           this.columns.push({
-            title: "日期",
-            key: "date",
+            title: '日期',
+            key: 'date',
             sortable: true
           });
           for (let i = 0; i < ret.columnNames.length; i++) {
@@ -176,25 +176,23 @@ export default {
             };
             this.columns.push(col);
           }
-          //setup for report column
+          // setup for report column
           this.columns.push({
-            title: "動作",
-            slot: "action",
+            title: '動作',
+            slot: 'action',
             width: 150,
-            align: "center"
+            align: 'center'
           });
           for (let row of ret.rows) {
             let rowData = {
-              date: new moment(row.date).format("lll"),
+              date: new moment(row.date).format('lll'),
               cellClassName: {}
             };
             for (let c = 0; c < row.cellData.length; c++) {
               let key = `col${c}`;
               rowData[key] = row.cellData[c].v;
               rowData.cellClassName[key] = row.cellData[c].cellClassName;
-              if (baseUrl.length != 0)
-                rowData.pdfUrl = `${baseUrl}pdfReport/${row.pdfReport}`;
-              else rowData.pdfUrl = `pdfReport/${row.pdfReport}`;
+              if (baseUrl.length !== 0) { rowData.pdfUrl = `${baseUrl}pdfReport/${row.pdfReport}`; } else rowData.pdfUrl = `pdfReport/${row.pdfReport}`;
             }
             this.rows.push(rowData);
           }

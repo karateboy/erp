@@ -13,27 +13,20 @@
 </template>
 
 <script>
-import InforCard from "_c/info-card";
-import config from "@/config";
-import moment from "moment";
-const baseUrl =
-  process.env.NODE_ENV === "development"
-    ? config.baseUrl.dev
-    : config.baseUrl.pro;
+import InforCard from '_c/info-card';
 
-import { getRealtimeData, getCurrentMonitor } from "@/api/data";
 export default {
-  name: "home",
+  name: 'home',
   components: {
     InforCard
   },
   data() {
     return {
       summary: {
-        _id: "erp",
-        icon: "ios-speedometer",
-        color: "#ff0000",
-        title: "ERP Summary"
+        _id: 'erp',
+        icon: 'ios-speedometer',
+        color: '#ff0000',
+        title: 'ERP Summary'
       },
       timer: undefined
     };
@@ -42,7 +35,7 @@ export default {
     this.reloadData();
   },
   methods: {
-    reloadData() {      
+    reloadData() {
       this.timer = setTimeout(this.reloadData, 30000);
     }
   },

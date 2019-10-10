@@ -11,3 +11,6 @@ target
 /bin/
 /.cache-main
 /.cache-tests
+/erp.iml
+/erp_front/yarn.lock
+*.log

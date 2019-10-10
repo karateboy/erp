@@ -5,10 +5,10 @@
 <template>
   <div class="login">
     <div class="login-con">
-      <Card icon="log-in" title="使用者登入" :bordered="false">
+      <Card icon="log-in" title="Login" :bordered="false">
         <div class="form-con">
           <login-form @on-success-valid="handleSubmit"></login-form>
-          <p class="login-tip">公用帳號user</p>
+          <p class="login-tip">default user</p>
         </div>
       </Card>
     </div>
@@ -16,14 +16,14 @@
 </template>
 
 <script>
-import LoginForm from "_c/login-form";
-import { mapActions } from "vuex";
+import LoginForm from '_c/login-form';
+import { mapActions } from 'vuex';
 export default {
   components: {
     LoginForm
   },
   methods: {
-    ...mapActions(["handleLogin", "getUserInfo"]),
+    ...mapActions(['handleLogin', 'getUserInfo']),
     handleSubmit({ userName, password }) {
       this.handleLogin({ userName, password }).then(
         res => {
