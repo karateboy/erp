@@ -1,5 +1,11 @@
 import axios from '@/libs/api.request'
 
+export const getOwnerlessImage = () => {
+  return axios.request({
+    url: 'ownerless-image',
+    method: 'get'
+  })
+}
 export const getMonitors = () => {
   return axios.request({
     url: 'monitor',

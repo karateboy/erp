@@ -6,7 +6,7 @@
       </Badge>
       <Icon :size="18" type="md-arrow-dropdown"></Icon>
       <DropdownMenu slot="list">
-        <DropdownItem name="logout">登出</DropdownItem>
+        <DropdownItem name="logout">Logout</DropdownItem>
       </DropdownMenu>
     </Dropdown>
   </div>

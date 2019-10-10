@@ -1,5 +1,8 @@
 package models
 
+import java.time.Instant
+import java.util.Date
+
 import akka.actor._
 import javax.inject.{Inject, Singleton}
 import models.ModelHelper._
@@ -59,7 +62,7 @@ class ImportAgent @Inject()(configuration: Configuration, imageOps: ImageOps) ex
     import org.mongodb.scala.bson._
 
     val imgId = new ObjectId()
-    val img = Image(imgId, file.getName, tags, file.lastModified(),
+    val img = Image(imgId, file.getName, tags, Date.from(Instant.ofEpochMilli(file.lastModified())),
       Files.readAllBytes(Paths.get(file.getAbsolutePath)))
 
     val f1 = imageOps.collection.insertOne(img).toFuture()

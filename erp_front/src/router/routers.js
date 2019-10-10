@@ -40,7 +40,7 @@ export default [
         path: '/home',
         name: 'home',
         meta: {
-          hideInMenu: true,
+          hideInMenu: false,
           title: '首頁',
           notCache: true,
           icon: 'md-home'
@@ -51,21 +51,41 @@ export default [
   },
   {
     path: '',
-    name: 'data_query',
+    name: 'process',
     meta: {
-      icon: 'md-stats',
-      title: '資料查詢'
+      hideInBread: true
     },
     component: Main,
     children: [
       {
-        path: 'history_data',
-        name: 'history_data',
+        path: 'process_images',
+        name: 'process_images',
         meta: {
-          icon: 'md-stats',
-          title: '歷史資料'
+          hideInBread: true,
+          icon: '_qq',
+          title: 'process_images'
         },
-        component: () => import('@/view/historyData/historyData')
+        component: () => import('@/view/processImage/processImage')
+      }
+    ]
+  },
+  {
+    path: '',
+    name: 'query',
+    meta: {
+      hideInBread: true
+    },
+    component: Main,
+    children: [
+      {
+        path: 'query_doc',
+        name: 'query_doc',
+        meta: {
+          hideInBread: true,
+          icon: '_qq',
+          title: 'query_doc'
+        },
+        component: () => import('@/view/join-page.vue')
       }
     ]
   },
