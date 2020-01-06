@@ -1,14 +1,11 @@
 package controllers
 
 import javax.inject._
-
-import play.api.mvc._
 import models._
-import play._
-import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.libs.json._
-import collection.JavaConverters
-import models.ObjectIdUtil._
+import play.api.mvc._
+
+import scala.concurrent.ExecutionContext.Implicits.global
 /**
  * This controller creates an `Action` to handle HTTP requests to the
  * application's home page.
