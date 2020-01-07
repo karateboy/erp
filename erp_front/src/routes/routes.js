@@ -5,8 +5,7 @@ import NotFound from '../pages/NotFoundPage.vue'
 // Admin pages
 import Overview from 'src/pages/Overview.vue'
 import Notifications from 'src/pages/Notifications.vue'
-import Upgrade from 'src/pages/Upgrade.vue'
-
+import MergeDoc from "@/pages/MergeDoc"
 const routes = [
   {
     path: '/',
@@ -24,14 +23,14 @@ const routes = [
         component: Overview
       },
       {
+        path: 'merge',
+        name: 'MergeDoc',
+        component: MergeDoc
+      },
+      {
         path: 'notifications',
         name: 'Notifications',
         component: Notifications
-      },
-      {
-        path: 'upgrade',
-        name: 'Upgrade to PRO',
-        component: Upgrade
       }
     ]
   },

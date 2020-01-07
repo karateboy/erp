@@ -22,8 +22,8 @@ class Login @Inject() (userDB: UserDB, cc: ControllerComponents)(implicit assets
 
   def authenticate = Action(cc.parsers.json) {
     implicit request =>
-      val credentail = request.body.validate[Credential]
-      credentail.fold(
+      val credential = request.body.validate[Credential]
+      credential.fold(
         {
           error =>
             BadRequest(Json.obj("ok" -> false, "msg" -> JsError.toJson(error)))

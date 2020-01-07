@@ -24,6 +24,8 @@ import './registerServiceWorker'
 import store from './store'
 
 axios.defaults.withCredentials = true
+axios.defaults.baseURL = process.env.NODE_ENV === 'development' ? "http://localhost:9000/" : "/";
+
 
 // plugin setup
 Vue.use(BootstrapVue)

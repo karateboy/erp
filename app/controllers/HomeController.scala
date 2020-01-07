@@ -24,6 +24,7 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps)(imp
     Redirect("/app/index.html")
   }
 
+  import models.ObjectIdUtil._
   def getOwnerLessImage = Authenticated.async {
     val f = imageOps.getNoOwner()(5)
     for (ret <- f) yield {
