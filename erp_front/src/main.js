@@ -16,15 +16,14 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import BootstrapVue from 'bootstrap-vue'
+import axios from 'axios'
 import App from './App.vue'
-
-// LightBootstrap plugin
 import LightBootstrap from './light-bootstrap-main'
-
-// router setup
 import routes from './routes/routes'
-
 import './registerServiceWorker'
+
+axios.defaults.withCredentials = true
+
 // plugin setup
 Vue.use(BootstrapVue)
 Vue.use(VueRouter)
