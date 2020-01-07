@@ -7,9 +7,9 @@
   "scripts": {
     "serve": "vue-cli-service serve --open",
     "build": "vue-cli-service build",
-    "e2e": "node test/e2e/runner.js",
     "lint": "vue-cli-service lint",
     "dev": "vue-cli-service serve --open",
+    "e2e": "node test/e2e/runner.js",
     "lint-fix": "vue-cli-service lint --fix"
   },
   "dependencies": {
@@ -21,13 +21,17 @@
     "v-tooltip": "^2.0.0-rc.33",
     "vue": "^2.6.6",
     "vue-router": "^3.0.2",
-    "vuee": "^1.0.0-security"
+    "vuee": "^1.0.0-security",
+    "vuex": "^3.1.2"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^3.4.0",
-    "@vue/cli-plugin-eslint": "^3.4.0",
-    "@vue/cli-plugin-pwa": "^3.4.0",
-    "@vue/cli-service": "^3.4.0",
+    "@vue/cli-plugin-babel": "^4.1.2",
+    "@vue/cli-plugin-eslint": "^4.1.2",
+    "@vue/cli-plugin-pwa": "^4.1.2",
+    "@vue/cli-plugin-router": "^4.1.2",
+    "@vue/cli-plugin-vuex": "^4.1.2",
+    "@vue/cli-service": "^4.1.2",
+    "eslint": "^4.19.1",
     "node-sass": "^4.11.0",
     "sass-loader": "^7.1.0",
     "vue-template-compiler": "^2.6.6"

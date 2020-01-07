@@ -21,6 +21,7 @@ import App from './App.vue'
 import LightBootstrap from './light-bootstrap-main'
 import routes from './routes/routes'
 import './registerServiceWorker'
+import store from './store'
 
 axios.defaults.withCredentials = true
 
@@ -46,5 +47,6 @@ const router = new VueRouter({
 new Vue({
   el: '#app',
   render: h => h(App),
+  store,
   router
 })
