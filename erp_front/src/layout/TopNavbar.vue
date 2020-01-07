@@ -59,8 +59,8 @@
               Log out
             </a>
           </li>
-        </ul> -->
-      </div>
+        </ul> 
+      </div>-->
     </div>
   </nav>
 </template>
