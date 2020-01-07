@@ -26,7 +26,7 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps)(imp
 
   import models.ObjectIdUtil._
   def getOwnerLessImage = Authenticated.async {
-    val f = imageOps.getNoOwner()(5)
+    val f = imageOps.getNoOwner()(10)
     for (ret <- f) yield {
       implicit val writes = Json.writes[Image]
       Ok(Json.toJson(ret))

@@ -16,11 +16,14 @@ case class Image(_id: ObjectId, fileName: String, tags: Seq[String], date: Date,
 @Singleton
 class ImageOps @Inject()(mongoDB: MongoDB) {
 
-  import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
-  import org.mongodb.scala.bson.codecs.DEFAULT_CODEC_REGISTRY
-  import org.mongodb.scala.bson.codecs.Macros._
+  import org.mongodb.scala.bson.codecs.Macros
 
-  val codecRegistry = fromRegistries(fromProviders(classOf[Image]), DEFAULT_CODEC_REGISTRY)
+  val imageProvider = Macros.createCodecProvider[Image]()
+
+  import org.mongodb.scala.bson.codecs.DEFAULT_CODEC_REGISTRY
+  import org.bson.codecs.configuration.CodecRegistries.{fromRegistries, fromProviders}
+
+  val codecRegistry = fromRegistries(DEFAULT_CODEC_REGISTRY, fromProviders(imageProvider))
 
   val NAME = "image"
   val collection = mongoDB.database.getCollection[Image](NAME).withCodecRegistry(codecRegistry)
@@ -34,11 +37,15 @@ class ImageOps @Inject()(mongoDB: MongoDB) {
     f
   }
 
-  def getNoOwner()(limit: Int): Future[Seq[Image]] = {
+  def getNoOwner()(limit: Int): Future[Seq[String]] = {
     val projection = Projections.include("_id")
-    val f = collection.find(Filters.equal("owner", None)).projection(projection).sort(Sorts.ascending("date"))
+    val f = mongoDB.database.getCollection((NAME)).find(Filters.equal("owner", null)).projection(projection).sort(Sorts.ascending("date"))
       .limit(limit).toFuture()
     f.failed.foreach(errorHandler)
-    f
+    for(docs <- f) yield
+      {
+        docs map { d=> d.getObjectId("_id").toHexString}
+      }
+
   }
 }
