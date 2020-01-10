@@ -8,7 +8,7 @@ case class User(id: String, password: String, name: String)
 @Singleton
 class UserDB @Inject() (config: Configuration) {
   implicit val configLoader: ConfigLoader[Seq[User]] = new ConfigLoader[Seq[User]] {
-    def load(rootConfig: Config, path: String): Seq[User] = {
+    def load(rootConfig: com.typesafe.config.Config, path: String): Seq[User] = {
       val userConfigList = rootConfig.getConfigList(path)
       val users = for (userConfig <- userConfigList.asScala) yield {
         val id = userConfig.getString("id")

@@ -12,10 +12,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class ImageDoc(_id: ObjectId, tags: Seq[String], date: Date, text: String,
-                    images: Seq[ObjectId], imageTypes: Seq[String])
+                    images: Seq[ObjectId])
+
+case class ShortDocJson(_id: String, tags: Seq[String], dateTime: Long)
 
 @Singleton
-class ImageDocOps @Inject()(mongoDB: MongoDB) {
+class ImageDocOps @Inject()(configOps: ConfigOps, mongoDB: MongoDB) {
 
   import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
   import org.mongodb.scala.bson.codecs.DEFAULT_CODEC_REGISTRY
@@ -24,20 +26,40 @@ class ImageDocOps @Inject()(mongoDB: MongoDB) {
   val codecRegistry = fromRegistries(fromProviders(classOf[ImageDoc]), DEFAULT_CODEC_REGISTRY)
 
   val NAME = "imageDoc"
-  val collection = mongoDB.database.getCollection[Image](NAME).withCodecRegistry(codecRegistry)
+  val collection = mongoDB.database.getCollection[ImageDoc](NAME).withCodecRegistry(codecRegistry)
   collection.createIndex(Indexes.ascending("tags")).toFuture().failed.foreach(errorHandler)
   collection.createIndex(Indexes.ascending("date")).toFuture().failed.foreach(errorHandler)
   collection.createIndex(Indexes.ascending("images")).toFuture().failed.foreach(errorHandler)
   collection.createIndex(Indexes.ascending("text")).toFuture().failed.foreach(errorHandler)
 
-  def get(objId: ObjectId): Future[Image] = {
+  def get(objId: ObjectId): Future[ImageDoc] = {
     val f = collection.find(Filters.eq("_id", objId)).first().toFuture()
     f.failed.foreach(errorHandler)
     f
   }
 
-  def query(filter: Bson)(limit: Int) = {
-    val f = collection.find(filter).sort(Sorts.descending("date")).limit(limit).toFuture()
+  import scala.collection.JavaConverters._
+
+  def query(filter: Bson)(skip: Int)(limit: Int) = {
+    val proj = Projections.include("_id", "tags", "date")
+    val f = mongoDB.database.getCollection(NAME).find(filter).projection(proj).sort(Sorts.descending("date")).skip(skip).limit(limit).toFuture()
+    f.failed.foreach(errorHandler)
+    for (docs <- f) yield {
+      docs map { doc =>
+        val _id = doc("_id").asObjectId().getValue.toHexString
+        val tags = doc("tags").asArray().getValues.asScala.map {
+          _.asString().getValue
+        }
+        val date = doc("date").asDateTime().getValue
+        ShortDocJson(_id, tags, date)
+      }
+    }
+  }
+
+  def insertOne(doc: ImageDoc) = {
+    val configF = configOps.updateTags(doc.tags)
+    configF.failed.foreach(errorHandler)
+    val f = collection.insertOne(doc).toFuture()
     f.failed.foreach(errorHandler)
     f
   }

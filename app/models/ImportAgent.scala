@@ -6,6 +6,7 @@ import java.util.Date
 import akka.actor._
 import javax.inject.{Inject, Singleton}
 import models.ModelHelper._
+import org.apache.commons.io.FilenameUtils
 import play.api._
 
 import scala.collection.JavaConverters._
@@ -59,10 +60,14 @@ class ImportAgent @Inject()(configuration: Configuration, imageOps: ImageOps) ex
   def parser(file: File, tags: Seq[String]): Boolean = {
     import java.nio.file.{Files, Paths}
 
+
     import org.mongodb.scala.bson._
 
+    val ext1 = FilenameUtils.getExtension(file.getName);
     val imgId = new ObjectId()
-    val img = Image(imgId, file.getName, tags, Date.from(Instant.ofEpochMilli(file.lastModified())),
+    val newFileName = s"${imgId.toHexString}.${FilenameUtils.getExtension(file.getName)}"
+    Logger.debug(newFileName)
+    val img = Image(imgId, newFileName, tags, Date.from(Instant.ofEpochMilli(file.lastModified())),
       Files.readAllBytes(Paths.get(file.getAbsolutePath)))
 
     val f1 = imageOps.collection.insertOne(img).toFuture()

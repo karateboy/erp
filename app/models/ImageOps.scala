@@ -46,6 +46,11 @@ class ImageOps @Inject()(mongoDB: MongoDB) {
       {
         docs map { d=> d.getObjectId("_id").toHexString}
       }
+  }
 
+  def updateOwner(ownerId:ObjectId, imageIds: Seq[ObjectId])={
+    val f = collection.updateMany(Filters.in("_id", imageIds:_*), Updates.set("owner", ownerId)).toFuture()
+    f.failed.foreach(errorHandler)
+    f
   }
 }

@@ -10,11 +10,11 @@
         <i class="nc-icon nc-circle-09"></i>
         <p>Merge Document</p>
       </sidebar-link>
-      <!--       <sidebar-link to="/admin/typography">
+      <sidebar-link to="/admin/search">
         <i class="nc-icon nc-paper-2"></i>
-        <p>Typography</p>
+        <p>Search Document</p>
       </sidebar-link>
-      <sidebar-link to="/admin/icons">
+      <!--       <sidebar-link to="/admin/icons">
         <i class="nc-icon nc-atom"></i>
         <p>Icons</p>
       </sidebar-link>

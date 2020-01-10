@@ -6,6 +6,7 @@ import NotFound from '../pages/NotFoundPage.vue'
 import Overview from 'src/pages/Overview.vue'
 import Notifications from 'src/pages/Notifications.vue'
 import MergeDoc from "@/pages/MergeDoc"
+import SearchDoc from "@/pages/SearchDoc"
 const routes = [
   {
     path: '/',
@@ -26,6 +27,11 @@ const routes = [
         path: 'merge',
         name: 'MergeDoc',
         component: MergeDoc
+      },
+      {
+        path: 'search',
+        name: 'SearchDoc',
+        component: SearchDoc
       },
       {
         path: 'notifications',

@@ -41,7 +41,6 @@ export default Vue.extend({
       .post("/login", { userName: "user", password: "abc123" })
       .then(res => {
         const ret = res.data;
-        console.log(ret);
       })
       .catch(err => alert(err));
   }

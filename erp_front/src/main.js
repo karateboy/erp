@@ -20,8 +20,10 @@ import axios from 'axios'
 import App from './App.vue'
 import LightBootstrap from './light-bootstrap-main'
 import routes from './routes/routes'
-import './registerServiceWorker'
+//import './registerServiceWorker'
 import store from './store'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 axios.defaults.withCredentials = true
 axios.defaults.baseURL = process.env.NODE_ENV === 'development' ? "http://localhost:9000/" : "/";

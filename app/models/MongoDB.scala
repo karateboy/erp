@@ -1,17 +1,18 @@
 package models
-import javax.inject.{ Inject, Singleton }
+
+import javax.inject.{Inject, Singleton}
 import play.api._
-import com.typesafe.config._
-import scala.concurrent._
-import scala.collection.JavaConverters._
+
 
 @Singleton
-class MongoDB @Inject() (config: Configuration) {
+class MongoDB @Inject()(config: Configuration) {
+
   import org.mongodb.scala._
 
   case class MongoDbConfig(url: String, dbName: String)
+
   implicit val configLoader: ConfigLoader[MongoDbConfig] = new ConfigLoader[MongoDbConfig] {
-    def load(rootConfig: Config, path: String): MongoDbConfig = {
+    def load(rootConfig: com.typesafe.config.Config, path: String): MongoDbConfig = {
       val myConfig = rootConfig.getConfig(path)
       val url = myConfig.getString("url")
       val dbName = myConfig.getString("db")
