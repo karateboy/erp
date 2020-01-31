@@ -9,10 +9,11 @@ import org.mongodb.scala.model._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.collection.JavaConverters._
 
 case class Image(_id: ObjectId, fileName: String, tags: Seq[String], date: Date,
                  content: Array[Byte], owner: Option[ObjectId] = None)
-
+case class ImageParam(_id: String, tags:Seq[String])
 @Singleton
 class ImageOps @Inject()(mongoDB: MongoDB) {
 
@@ -37,14 +38,18 @@ class ImageOps @Inject()(mongoDB: MongoDB) {
     f
   }
 
-  def getNoOwner()(limit: Int): Future[Seq[String]] = {
-    val projection = Projections.include("_id")
+  def getNoOwner()(limit: Int): Future[Seq[ImageParam]] = {
+    val projection = Projections.include("_id", "tags")
     val f = mongoDB.database.getCollection((NAME)).find(Filters.equal("owner", null)).projection(projection).sort(Sorts.ascending("date"))
       .limit(limit).toFuture()
     f.failed.foreach(errorHandler)
     for(docs <- f) yield
       {
-        docs map { d=> d.getObjectId("_id").toHexString}
+        docs map { doc=>
+          val _id = doc.getObjectId("_id").toHexString
+          val tags = doc("tags").asArray().asScala.map(_.asString().getValue).toSeq
+          ImageParam(_id=_id, tags=tags)
+        }
       }
   }
 

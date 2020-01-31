@@ -4,21 +4,24 @@
       <b-form-checkbox-group id="imageIdGroup" v-model="form.mergeImageId">
         <b-container>
           <b-row>
-            <b-col v-for="(id) in row1" :key="id">
-              <b-form-checkbox :value="id" />
-              <b-img :src="imageUrl(id)" fluid thumbnail />
+            <b-col v-for="param in row1" :key="param._id">
+              {{param.tags}}
+              <b-form-checkbox :value="param._id" />
+              <b-img :src="imageUrl(param._id)" fluid thumbnail />
             </b-col>
           </b-row>
           <b-row>
-            <b-col v-for="(id) in row2" :key="id">
-              <b-form-checkbox :value="id" />
-              <b-img :src="imageUrl(id)" fluid thumbnail />
+            <b-col v-for="param in row2" :key="param._id">
+              {{param.tags}}
+              <b-form-checkbox :value="param._id" />
+              <b-img :src="imageUrl(param._id)" fluid thumbnail />
             </b-col>
           </b-row>
           <b-row>
-            <b-col v-for="(id) in row3" :key="id">
-              <b-form-checkbox :value="id" />
-              <b-img :src="imageUrl(id)" fluid thumbnail />
+            <b-col v-for="param in row3" :key="param._id">
+              {{param.tags}}
+              <b-form-checkbox :value="param._id" />
+              <b-img :src="imageUrl(param._id)" fluid thumbnail />
             </b-col>
           </b-row>
         </b-container>
@@ -38,7 +41,7 @@ import Vue from "vue";
 import axios from "axios";
 export default Vue.extend({
   mounted() {
-    this.loadOwneressImage();
+    this.loadOwnerlessImage();
     this.loadDefaultTags();
   },
   computed: {
@@ -62,6 +65,31 @@ export default Vue.extend({
       ownerlessImages: [],
       tags: []
     };
+  },
+  watch: {
+    "form.mergeImageId": function(newValue, oldValue) {
+      let set = new Set();
+
+      if (newValue.length > oldValue.length) {
+        for (let tag of this.form.tags) {
+          set.add(tag);
+        }
+        let newTags = this.getTags(newValue[newValue.length - 1]);
+        for (let tag of newTags) {
+          if (!set.has(tag)) this.form.tags.push(tag);
+        }
+      } else {
+        for (let _id of newValue) {
+          let newTags = this.getTags(_id);
+          for (let tag of newTags) set.add(tag);
+        }
+        let newTags = this.form.tags.filter(x => set.has(x));
+        this.form.tags.splice(0, this.form.tags.length);
+        for (let tag of newTags) {
+          this.form.tags.push(tag);
+        }
+      }
+    }
   },
   methods: {
     imageUrl(id) {
@@ -107,10 +135,10 @@ export default Vue.extend({
       evt.preventDefault();
       this.form.tags.splice(0, this.form.tags.length);
       this.form.mergeImageId.splice(0, this.form.mergeImageId.length);
-      this.loadOwneressImage();
+      this.loadOwnerlessImage();
       this.loadDefaultTags();
     },
-    loadOwneressImage() {
+    loadOwnerlessImage() {
       axios
         .get("/ownerless-image")
         .then(res => {
@@ -133,6 +161,14 @@ export default Vue.extend({
           }
         })
         .catch(err => alert(err));
+    },
+    getTags(_id) {
+      for (let param of this.ownerlessImages) {
+        if (param._id === _id) {
+          return param.tags;
+        }
+      }
+      return [];
     }
   }
 });
