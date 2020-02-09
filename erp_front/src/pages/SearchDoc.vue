@@ -41,6 +41,24 @@ import axios from "axios";
 import moment from "moment";
 import moment_tz from "moment-timezone";
 import ImageDoc from "./ImageDoc.vue";
+interface SearchForm {
+  tags: string[];
+  skip: number;
+  limit: number;
+}
+
+interface ShortDocJson {
+  _id: string, 
+  tags: string[], 
+  dateTime: number  
+}
+
+interface DisplayDocEntry {
+  _id: string, 
+  tags: string[], 
+  date: string  
+}
+
 export default Vue.extend({
   components: {
     ImageDoc
@@ -49,28 +67,32 @@ export default Vue.extend({
     this.loadDefaultTags();
   },
   data() {
-    return {
-      form: {
-        tags: [],
-        skip: 0,
-        limit: 10
-      },
+    let form: SearchForm = {
       tags: [],
-      searchResult: [],
+      skip: 0,
+      limit: 10
+    };
+
+    let selected = Array<ShortDocJson>();
+    let searchResult = Array<DisplayDocEntry>();
+    return {
+      form,
+      tags: Array<string>(),
+      searchResult,
       searched: false,
-      fields: ['selected', 'tags', 'date'],
-      selected: [],
+      fields: ["selected", "tags", "date"],
+      selected ,
       docTitle: "doc title",
-      docID: "test"
+      docID: ""
     };
   },
   methods: {
-    onRowSelected(items) {
+    onRowSelected(items : ShortDocJson[]) {
       this.selected = items;
       this.docID = items[0]._id;
-      this.$bvModal.show("docModal")
+      this.$bvModal.show("docModal");
     },
-    validateForm(form) {
+    validateForm(form: SearchForm) {
       if (form.tags.length === 0) {
         this.$bvModal
           .msgBoxOk("No tags!")
@@ -97,7 +119,7 @@ export default Vue.extend({
 
           this.searchResult.splice(0, this.searchResult.length);
           for (let doc of ret) {
-            let entry = {
+            let entry : DisplayDocEntry = {
               _id: doc._id,
               tags: doc.tags,
               date: moment(doc.dateTime)

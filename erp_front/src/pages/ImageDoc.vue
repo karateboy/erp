@@ -24,6 +24,7 @@ export default Vue.extend({
     this.loadDocument();
   },
   data() {
+    let tags: string[] = [];
     return {
       doc: {
         _id: "",
@@ -32,7 +33,7 @@ export default Vue.extend({
         text: "",
         images: []
       },
-      tags: [],
+      tags,
       docReady: false
     };
   },
@@ -50,7 +51,7 @@ export default Vue.extend({
         })
         .catch(err => alert(err));
     },
-    loadDocument(id) {
+    loadDocument() {
       axios
         .get(`/doc/${this._id}`)
         .then(res => {
@@ -60,12 +61,12 @@ export default Vue.extend({
         })
         .catch(err => alert(err));
     },
-    displayLocalTime(dt) {
+    displayLocalTime(dt:number) {
       return moment(dt)
         .tz("Asia/Bangkok")
         .format("lll");
     },
-    imageUrl(id) {
+    imageUrl(id:string) {
       return process.env.NODE_ENV === "development"
         ? `http://localhost:9000/image/${id}`
         : `/image/${id}`;

@@ -49,7 +49,7 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.name == 'login' || store.state.isAuthenticated)
-    next(true)
+    next(to)
   else
     next({ name: 'login' })
 })

@@ -1,6 +1,10 @@
 {
   "root": true,
   "extends": [
-    "plugin:vue/essential"
-  ]
+    "plugin:vue/essential",
+    "@vue/typescript"
+  ],
+  "parserOptions": {
+    "parser": "@typescript-eslint/parser"
+  }
 }

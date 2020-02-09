@@ -4,8 +4,9 @@
       <b-form-checkbox-group id="imageIdGroup" v-model="form.mergeImageId">
         <b-container>
           <b-row>
-            <b-col v-for="param in row1" :key="param._id">              
-              <b-form-checkbox :value="param._id" /> {{param.tags}}
+            <b-col v-for="param in row1" :key="param._id">
+              <b-form-checkbox :value="param._id" />
+              {{param.tags}}
               <b-img :src="imageUrl(param._id)" fluid thumbnail />
             </b-col>
           </b-row>
@@ -38,31 +39,43 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
+interface ImageParam {
+  _id: string;
+  tags: string[];
+}
+
+interface NewDocParam {
+  _id: string;
+  mergeImageId: string[];
+  tags: string[];
+}
+
 export default Vue.extend({
   mounted() {
     this.loadOwnerlessImage();
     this.loadDefaultTags();
   },
   computed: {
-    row1() {
+    row1(): ImageParam[] {
       return this.ownerlessImages.slice(0, 4);
     },
-    row2() {
+    row2(): ImageParam[] {
       return this.ownerlessImages.slice(4, 8);
     },
-    row3() {
+    row3(): ImageParam[] {
       return this.ownerlessImages.slice(8, 12);
     }
   },
   data() {
+    let form: NewDocParam = {
+      _id: "",
+      mergeImageId: [],
+      tags: Array<string>()
+    };
     return {
-      form: {
-        _id: "",
-        mergeImageId: [],
-        tags: []
-      },
-      ownerlessImages: [],
-      tags: []
+      form,
+      ownerlessImages: Array<ImageParam>(),
+      tags: Array<string>()
     };
   },
   watch: {
@@ -91,12 +104,12 @@ export default Vue.extend({
     }
   },
   methods: {
-    imageUrl(id) {
+    imageUrl(id: string) {
       return process.env.NODE_ENV === "development"
         ? `http://localhost:9000/image/${id}`
         : `/image/${id}`;
     },
-    validateForm(form) {
+    validateForm(form: NewDocParam) {
       if (form.mergeImageId.length === 0) {
         this.$bvModal
           .msgBoxOk("No image is selected!")
@@ -115,7 +128,7 @@ export default Vue.extend({
 
       return true;
     },
-    onSubmit(evt) {
+    onSubmit(evt: Event) {
       evt.preventDefault();
       if (!this.validateForm(this.form)) return;
 
@@ -130,7 +143,7 @@ export default Vue.extend({
         })
         .catch(err => alert(err));
     },
-    onReset(evt) {
+    onReset(evt: Event) {
       evt.preventDefault();
       this.form.tags.splice(0, this.form.tags.length);
       this.form.mergeImageId.splice(0, this.form.mergeImageId.length);
@@ -153,7 +166,7 @@ export default Vue.extend({
       axios
         .get("/tags")
         .then(res => {
-          const ret = res.data;
+          const ret: string[] = res.data;
           this.tags.splice(0, this.tags.length);
           for (let id of ret) {
             this.tags.push(id);
@@ -161,7 +174,7 @@ export default Vue.extend({
         })
         .catch(err => alert(err));
     },
-    getTags(_id) {
+    getTags(_id: string): string[] {
       for (let param of this.ownerlessImages) {
         if (param._id === _id) {
           return param.tags;
