@@ -4,9 +4,8 @@
       <b-form-checkbox-group id="imageIdGroup" v-model="form.mergeImageId">
         <b-container>
           <b-row>
-            <b-col v-for="param in row1" :key="param._id">
-              {{param.tags}}
-              <b-form-checkbox :value="param._id" />
+            <b-col v-for="param in row1" :key="param._id">              
+              <b-form-checkbox :value="param._id" /> {{param.tags}}
               <b-img :src="imageUrl(param._id)" fluid thumbnail />
             </b-col>
           </b-row>

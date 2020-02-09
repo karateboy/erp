@@ -21,7 +21,7 @@ import App from './App.vue'
 import LightBootstrap from './light-bootstrap-main'
 import routes from './routes/routes'
 //import './registerServiceWorker'
-import store from './store'
+import store from './store/index'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
@@ -47,6 +47,12 @@ const router = new VueRouter({
   }
 })
 
+router.beforeEach((to, from, next) => {
+  if (to.name == 'login' || store.state.isAuthenticated)
+    next(true)
+  else
+    next({ name: 'login' })
+})
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

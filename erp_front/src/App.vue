@@ -35,14 +35,6 @@
 import Vue from "vue";
 import moment from "axios";
 import axios from "axios";
-export default Vue.extend({
-  mounted() {
-    axios
-      .post("/login", { userName: "user", password: "abc123" })
-      .then(res => {
-        const ret = res.data;
-      })
-      .catch(err => alert(err));
-  }
+export default Vue.extend({ 
 });
 </script>

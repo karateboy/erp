@@ -1,29 +1,43 @@
 package models
-import javax.inject.{ Inject, Singleton }
+
+import javax.inject.{Inject, Singleton}
 import play.api._
 import com.typesafe.config._
-import scala.concurrent._
-import scala.collection.JavaConverters._
-case class User(id: String, password: String, name: String)
+import models.ModelHelper.errorHandler
+import org.mongodb.scala.model.Indexes
+import scala.concurrent.ExecutionContext.Implicits.global
+import models.ModelHelper._
+
+case class User(_id: String, password: String, groups: Seq[String])
+
 @Singleton
-class UserDB @Inject() (config: Configuration) {
-  implicit val configLoader: ConfigLoader[Seq[User]] = new ConfigLoader[Seq[User]] {
-    def load(rootConfig: com.typesafe.config.Config, path: String): Seq[User] = {
-      val userConfigList = rootConfig.getConfigList(path)
-      val users = for (userConfig <- userConfigList.asScala) yield {
-        val id = userConfig.getString("id")
-        val password = userConfig.getString("password")
-        val name = userConfig.getString("name")
-        User(id, password, name)
-      }
-      users
+class UserDB @Inject()(mongoDB: MongoDB) {
+
+  import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
+  import org.mongodb.scala.bson.codecs.DEFAULT_CODEC_REGISTRY
+  import org.mongodb.scala.bson.codecs.Macros._
+
+  val codecRegistry = fromRegistries(fromProviders(classOf[User]), DEFAULT_CODEC_REGISTRY)
+
+  val NAME = "users"
+  val collection = mongoDB.database.getCollection[User](NAME).withCodecRegistry(codecRegistry)
+  collection.createIndex(Indexes.ascending("groups")).toFuture().failed.foreach(errorHandler)
+
+  for (count <- collection.countDocuments().toFuture()) {
+    //Insert default user
+    if (count == 0) {
+      collection.insertOne(User("user", "abc123", Seq("admin"))).toFuture()
+
     }
   }
 
-  val people = config.get[Seq[User]]("users")
 
-  Logger.info(s"User = ${people.size}")
+def getUserById (_id: String) = {
 
-  def getUserById(id: String) = people.find(_.id == id)
+  import org.mongodb.scala.model._
 
+  val f = collection.find (Filters.equal ("_id", _id) ).toFuture ()
+  f.failed.foreach (errorHandler () )
+  f
+}
 }

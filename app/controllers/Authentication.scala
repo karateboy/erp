@@ -4,7 +4,7 @@ import play.api.mvc.Security._
 import play.api.mvc._
 import scala.concurrent._
 
-case class UserInfo(id: String, name: String, groupId: String)
+case class UserInfo(id: String, name: String)
 
 class Authentication(cc: ControllerComponents)(implicit ec: ExecutionContext)
   extends AbstractController(cc) {
@@ -16,9 +16,8 @@ class Authentication(cc: ControllerComponents)(implicit ec: ExecutionContext)
 
     for {
       id <- request.session.get(idKey)
-      group <- request.session.get(groupKey)
       name <- request.session.get(nameKey)
-    } yield UserInfo(id, name, group)
+    } yield UserInfo(id, name)
 
   }
 
@@ -36,7 +35,7 @@ class Authentication(cc: ControllerComponents)(implicit ec: ExecutionContext)
 
   def setUserinfo[A](request: Request[A], userInfo: UserInfo) = {
     request.session +
-      (idKey -> userInfo.id.toString()) + (groupKey -> userInfo.groupId.toString()) +
+      (idKey -> userInfo.id.toString()) +
       (nameKey -> userInfo.name)
   }
 

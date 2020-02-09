@@ -1,12 +1,10 @@
 package controllers
 
 import javax.inject._
-import play.api._
-import play.api.mvc._
 import models._
-import play._
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import play.api.mvc._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 case class Credential(userName: String, password: String)
@@ -20,23 +18,27 @@ class Login @Inject() (userDB: UserDB, cc: ControllerComponents)(implicit assets
   implicit val credentialReads = Json.reads[Credential]
   implicit val userWrites = Json.writes[User]
 
-  def authenticate = Action(cc.parsers.json) {
+  def authenticate = Action(cc.parsers.json).async {
     implicit request =>
       val credential = request.body.validate[Credential]
       credential.fold(
-        {
+
           error =>
-            BadRequest(Json.obj("ok" -> false, "msg" -> JsError.toJson(error)))
-        },
+            Future {
+              BadRequest(Json.obj("ok" -> false, "msg" -> JsError.toJson(error)))
+            }
+        ,
         crd => {
-          val optUser = userDB.getUserById(crd.userName)
-          if (optUser.isEmpty || optUser.get.password != crd.password)
-            Ok(Json.obj("ok" -> false, "msg" -> "密碼或帳戶錯誤"))
-          else {
-            val user = optUser.get
-            implicit val userInfoWrite = Json.writes[UserInfo]
-            val userInfo = UserInfo(user.id, user.name, "Admin")
-            Ok(Json.obj("ok" -> true, "user" -> userInfo)).withSession(setUserinfo(request, userInfo))
+          val f = userDB.getUserById(crd.userName)
+          for(ret <- f)yield {
+            if(ret.isEmpty|| ret(0).password != crd.password)
+              Ok(Json.obj("ok" -> false))
+            else{
+              val user = ret(0)
+              implicit val userInfoWrite = Json.writes[UserInfo]
+              val userInfo = UserInfo(user._id, user._id)
+              Ok(Json.obj("ok" -> true, "user" -> userInfo)).withSession(setUserinfo(request, userInfo))
+            }
           }
         })
   }
@@ -45,9 +47,10 @@ class Login @Inject() (userDB: UserDB, cc: ControllerComponents)(implicit assets
     Ok(Json.obj(("ok" -> true))).withNewSession
   }
 
-  def getUserInfo = Authenticated {
+  def getUserInfo = Authenticated.async {
     implicit request =>
-      val user = request.user
-      Ok("")
+      val userInfo = request.user
+      for(ret <- userDB.getUserById(userInfo.id))yield
+        Ok(Json.toJson(ret.head))
   }
 }

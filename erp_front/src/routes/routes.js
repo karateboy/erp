@@ -7,11 +7,17 @@ import Overview from 'src/pages/Overview.vue'
 import Notifications from 'src/pages/Notifications.vue'
 import MergeDoc from "@/pages/MergeDoc"
 import SearchDoc from "@/pages/SearchDoc"
+import Login from "@/pages/Login"
 const routes = [
   {
     path: '/',
     component: DashboardLayout,
     redirect: '/admin/overview'
+  },
+  {
+    path: "/login",
+    name: "login",
+    component: Login
   },
   {
     path: '/admin',
