@@ -63,11 +63,22 @@ class ImportAgent @Inject()(configuration: Configuration, imageOps: ImageOps) ex
 
     import org.mongodb.scala.bson._
 
-    val ext1 = FilenameUtils.getExtension(file.getName);
+    val fileExt = FilenameUtils.getExtension(file.getName);
     val imgId = new ObjectId()
-    val newFileName = s"${imgId.toHexString}.${FilenameUtils.getExtension(file.getName)}"
+    val newFileName = s"${imgId.toHexString}.${fileExt}"
     Logger.debug(newFileName)
-    val img = Image(imgId, newFileName, tags, Date.from(Instant.ofEpochMilli(file.lastModified())),
+    val extTags: Seq[String] =
+      if (fileExt == "pdf")
+        tags:+ "pdf"
+      else if (fileExt == "jpg" || fileExt == "jpeg" || fileExt == "png")
+        tags:+ "Image"
+      else if (fileExt == "xlsx")
+        tags:+ "Excel"
+      else
+        tags
+
+
+    val img = Image(imgId, newFileName, extTags, Date.from(Instant.ofEpochMilli(file.lastModified())),
       Files.readAllBytes(Paths.get(file.getAbsolutePath)))
 
     val f1 = imageOps.collection.insertOne(img).toFuture()

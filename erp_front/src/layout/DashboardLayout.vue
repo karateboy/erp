@@ -7,12 +7,16 @@
         <p>Dashboard</p>
       </sidebar-link>
       <sidebar-link to="/admin/merge">
-        <i class="nc-icon nc-circle-09"></i>
+        <i class="nc-icon nc-settings-gear-64"></i>
         <p>Merge Document</p>
       </sidebar-link>
       <sidebar-link to="/admin/search">
-        <i class="nc-icon nc-paper-2"></i>
+        <i class="nc-icon nc-zoom-split"></i>
         <p>Search Document</p>
+      </sidebar-link>
+      <sidebar-link to="/admin/userManagement">        
+        <i class="nc-icon nc-circle-09"></i>
+        <p>User Management</p>
       </sidebar-link>
       <!--       <sidebar-link to="/admin/icons">
         <i class="nc-icon nc-atom"></i>

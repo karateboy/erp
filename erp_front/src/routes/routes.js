@@ -8,6 +8,7 @@ import Notifications from 'src/pages/Notifications.vue'
 import MergeDoc from "@/pages/MergeDoc"
 import SearchDoc from "@/pages/SearchDoc"
 import Login from "@/pages/Login"
+import UserManagement from "@/pages/UserManagement"
 const routes = [
   {
     path: '/',
@@ -43,6 +44,11 @@ const routes = [
         path: 'notifications',
         name: 'Notifications',
         component: Notifications
+      },
+      {
+        path: 'userManagement',
+        name: 'userManagement',
+        component: UserManagement
       }
     ]
   },

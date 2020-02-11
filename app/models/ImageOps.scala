@@ -13,7 +13,9 @@ import scala.collection.JavaConverters._
 
 case class Image(_id: ObjectId, fileName: String, tags: Seq[String], date: Date,
                  content: Array[Byte], owner: Option[ObjectId] = None)
-case class ImageParam(_id: String, tags:Seq[String])
+
+case class ImageParam(_id: String, fileName: String, tags: Seq[String])
+
 @Singleton
 class ImageOps @Inject()(mongoDB: MongoDB) {
 
@@ -38,24 +40,44 @@ class ImageOps @Inject()(mongoDB: MongoDB) {
     f
   }
 
-  def getNoOwner()(limit: Int): Future[Seq[ImageParam]] = {
-    val projection = Projections.include("_id", "tags")
-    val f = mongoDB.database.getCollection((NAME)).find(Filters.equal("owner", null)).projection(projection).sort(Sorts.ascending("date"))
+  def getNoOwner()(skip: Int, limit: Int): Future[Seq[ImageParam]] = {
+    val projection = Projections.include("_id", "tags", "fileName")
+    val f = mongoDB.database.getCollection(NAME).find(Filters.equal("owner", null))
+      .projection(projection)
+      .sort(Sorts.ascending("date"))
+      .skip(skip)
       .limit(limit).toFuture()
     f.failed.foreach(errorHandler)
-    for(docs <- f) yield
-      {
-        docs map { doc=>
-          val _id = doc.getObjectId("_id").toHexString
-          val tags = doc("tags").asArray().asScala.map(_.asString().getValue).toSeq
-          ImageParam(_id=_id, tags=tags)
-        }
+    for (docs <- f) yield {
+      docs map { doc =>
+        val _id = doc.getObjectId("_id").toHexString
+        val tags = doc("tags").asArray().asScala.map(_.asString().getValue).toSeq
+        val fileName = doc.getString("fileName")
+        ImageParam(_id = _id, tags = tags, fileName = fileName)
       }
+    }
   }
 
-  def updateOwner(ownerId:ObjectId, imageIds: Seq[ObjectId])={
-    val f = collection.updateMany(Filters.in("_id", imageIds:_*), Updates.set("owner", ownerId)).toFuture()
+  def updateOwner(ownerId: ObjectId, imageIds: Seq[ObjectId]) = {
+    val f = collection.updateMany(Filters.in("_id", imageIds: _*), Updates.set("owner", ownerId)).toFuture()
     f.failed.foreach(errorHandler)
     f
+  }
+
+  def getImagesParam(idList: Seq[ObjectId]) = {
+    val projection = Projections.include("_id", "tags", "fileName")
+    val f = mongoDB.database.getCollection(NAME).find(Filters.in("_id", idList:_*))
+      .projection(projection).toFuture()
+    f.failed.foreach(errorHandler)
+    for (docs <- f) yield {
+      val ret = for(id <- idList) yield {
+        for(found <- docs.find(doc=>doc.getObjectId("_id") == id)) yield {
+          val tags = found("tags").asArray().asScala.map(_.asString().getValue).toSeq
+          val fileName = found.getString("fileName")
+          ImageParam(_id = id.toHexString, tags = tags, fileName = fileName)
+        }
+      }
+      ret flatMap {x=>x}
+    }
   }
 }

@@ -1,9 +1,12 @@
 package controllers
 
+import java.io.{File, FileOutputStream}
+import java.nio.file.Files
 import java.util.Date
 
 import javax.inject._
 import models._
+import org.bson.types.ObjectId
 import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc._
@@ -31,8 +34,8 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, doc
 
   import models.ObjectIdUtil._
 
-  def getOwnerLessImage = Authenticated.async {
-    val f = imageOps.getNoOwner()(12)
+  def getOwnerLessImage(skip: Int) = Authenticated.async {
+    val f = imageOps.getNoOwner()(skip, 12)
     for (ret <- f) yield {
       implicit val writes = Json.writes[ImageParam]
       Ok(Json.toJson(ret))
@@ -49,11 +52,47 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, doc
           "image/jpeg"
         else if (image.fileName.endsWith("png"))
           "image/png"
-        else
+        else if (image.fileName.endsWith("bmp"))
           "image/bmp"
-      Ok(image.content).as(contentType)
+        else if (image.fileName.endsWith("pdf"))
+          "application/pdf"
+        else
+          "image/*"
+
+      if (!image.fileName.endsWith("xlsx"))
+        Ok(image.content).as(contentType)
+      else {
+        val retFilePath = Files.createTempFile("temp", ".xlsx")
+        val retFile = new File(retFilePath.toAbsolutePath().toString())
+        val fo = new FileOutputStream(retFile)
+        fo.write(image.content)
+        fo.close()
+        Ok.sendFile(retFile,
+          onClose = () => {
+            Files.deleteIfExists(retFile.toPath())
+          })
+      }
     }
   }
+
+  def getFile(fileName: String) = Authenticated.async {
+    import org.mongodb.scala.bson._
+    val idStr = fileName.takeWhile(_ != '.')
+    val objectId = new ObjectId(idStr)
+    val f: Future[Image] = imageOps.get(objectId)
+    for (image <- f) yield {
+      val retFilePath = Files.createTempFile("temp", ".xlsx")
+      val retFile = new File(retFilePath.toAbsolutePath().toString())
+      val fo = new FileOutputStream(retFile)
+      fo.write(image.content)
+      fo.close()
+      Ok.sendFile(retFile,
+        onClose = () => {
+          Files.deleteIfExists(retFile.toPath())
+        })
+    }
+  }
+
 
   case class NewImageDocParam(_id: String, mergeImageId: Seq[String], tags: Seq[String])
 
@@ -68,6 +107,7 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, doc
             BadRequest(Json.obj("ok" -> false, "msg" -> JsError.toJson(error)))
           }
         , param => {
+
           import org.mongodb.scala.bson._
 
           val _id = if (param._id.isEmpty)
@@ -84,7 +124,8 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, doc
 
           for {
             retImageUpdate <- updateOwnerF
-            retDoc <- docOps.insertOne(doc)}
+            retDoc <- docOps.insertOne(doc)
+          }
             yield {
               Logger.info(retImageUpdate.toString)
               Logger.info(retDoc.toString())
@@ -99,8 +140,10 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, doc
     }
   }
 
-  def getDoc(_id:String)= Authenticated.async {
+  def getDoc(_id: String) = Authenticated.async {
+
     import org.mongodb.scala.bson._
+
     for (doc <- docOps.get(new ObjectId(_id))) yield {
       //val ids = docList map ( doc=> doc("_id").asObjectId().getValue.toHexString)
       implicit val write = Json.writes[ImageDoc]
@@ -109,7 +152,9 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, doc
   }
 
   def searchDoc(tags: String, skip: Int, limit: Int) = Authenticated.async {
+
     import org.mongodb.scala.model._
+
     val tagFilter =
       if (tags.isEmpty)
         Filters.exists("_id")
@@ -124,5 +169,13 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, doc
       implicit val write = Json.writes[ShortDocJson]
       Ok(Json.toJson(docList))
     }
+  }
+
+  def getImageParams(idList: String) = Authenticated.async {
+    implicit val writes = Json.writes[ImageParam]
+    val objIdList = idList.split(",") map { new ObjectId(_)}
+    val f = imageOps.getImagesParam(objIdList)
+    for(ret <- f) yield
+      Ok(Json.toJson(ret))
   }
 }

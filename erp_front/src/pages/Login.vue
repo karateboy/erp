@@ -134,9 +134,6 @@ export default Vue.extend({
     };
   },
   mounted() {
-    window.onbeforeunload = function() {
-      return "You will  leave this page";
-    };
   },
   computed: {},
   methods: {

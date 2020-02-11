@@ -4,7 +4,7 @@
       <b-form-group label="Document tags:" label-for="tags" description="Please select tag.">
         <b-form-checkbox-group id="tags" v-model="form.tags" :options="tags"></b-form-checkbox-group>
       </b-form-group>
-      <b-button variant="primary" @click.prevent="onSubmit">Query</b-button>
+      <b-button variant="primary" @click.prevent="onSubmit">Query</b-button> &nbsp;
       <b-button type="reset" variant="danger" @click.prevent="onReset">Reset</b-button>
     </b-form>
     <b-card v-if="searched" class="mt-3" header="Search Result">
@@ -30,16 +30,15 @@
         </template>
       </b-table>
     </b-card>
-    <b-modal id="docModal" :title="docTitle" size="xl" header-bg-variant="info" scrollable>
-      <image-doc :_id="docID"></image-doc>
-    </b-modal>
+    <b-card class="mt-3" header="Document Detail" v-if="docID">
+      <image-doc :_id="docID" :key="docID"></image-doc>
+    </b-card>
   </div>
 </template>
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
 import moment from "moment";
-import moment_tz from "moment-timezone";
 import ImageDoc from "./ImageDoc.vue";
 interface SearchForm {
   tags: string[];
@@ -90,7 +89,6 @@ export default Vue.extend({
     onRowSelected(items : ShortDocJson[]) {
       this.selected = items;
       this.docID = items[0]._id;
-      this.$bvModal.show("docModal");
     },
     validateForm(form: SearchForm) {
       if (form.tags.length === 0) {
@@ -122,9 +120,7 @@ export default Vue.extend({
             let entry : DisplayDocEntry = {
               _id: doc._id,
               tags: doc.tags,
-              date: moment(doc.dateTime)
-                .tz("Asia/Bangkok")
-                .format("lll")
+              date: moment(doc.dateTime).format("lll")
             };
             this.searchResult.push(entry);
           }

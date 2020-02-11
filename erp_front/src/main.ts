@@ -24,12 +24,22 @@ import routes from './routes/routes'
 import store from './store/index'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import {
+  faLayerGroup, faCompass, faAngleDown, faAngleRight,
+  faSearchPlus, faDownload, faSquare, faCheckSquare, faFileExcel, faHome,
+  faAddressCard, faUserCog, faTasks, faUser
+} from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 axios.defaults.withCredentials = true
 axios.defaults.baseURL = process.env.NODE_ENV === 'development' ? "http://localhost:9000/" : "/";
 
-
+library.add(faLayerGroup, faCompass, faAngleDown, faAngleRight, faSearchPlus,
+  faDownload, faSquare, faCheckSquare, faFileExcel, faHome, faAddressCard,
+  faUserCog, faTasks, faUser)
 // plugin setup
+Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.use(BootstrapVue)
 Vue.use(VueRouter)
 Vue.use(LightBootstrap)

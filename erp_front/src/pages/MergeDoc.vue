@@ -1,54 +1,68 @@
 <template>
   <div>
+    <b-modal
+      id="detailModal"
+      :title="`Tags: ${selectedImageParam.tags.join()}`"
+      size="xl"
+      header-bg-variant="info"
+      centered
+      scrollable
+      ok-only
+    >
+      <b-img
+        v-if="isImage(selectedImageParam.fileName)"
+        :src="fileUrl(selectedImageParam._id)"
+        fluid
+        thumbnail
+      />
+    </b-modal>
     <b-form @submit="onSubmit" @reset="onReset">
-      <b-form-checkbox-group id="imageIdGroup" v-model="form.mergeImageId">
-        <b-container>
-          <b-row>
-            <b-col v-for="param in row1" :key="param._id">
-              <b-form-checkbox :value="param._id" />
-              {{param.tags}}
-              <b-img :src="imageUrl(param._id)" fluid thumbnail />
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col v-for="param in row2" :key="param._id">
-              {{param.tags}}
-              <b-form-checkbox :value="param._id" />
-              <b-img :src="imageUrl(param._id)" fluid thumbnail />
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col v-for="param in row3" :key="param._id">
-              {{param.tags}}
-              <b-form-checkbox :value="param._id" />
-              <b-img :src="imageUrl(param._id)" fluid thumbnail />
-            </b-col>
-          </b-row>
-        </b-container>
-      </b-form-checkbox-group>
       <b-form-group label="Existing tags:">
         <b-form-checkbox-group id="existing-tags" v-model="form.tags" :options="tags"></b-form-checkbox-group>
         <b-form-tags v-model="form.tags" class="mb-2"></b-form-tags>
       </b-form-group>
-
-      <b-button type="submit" variant="primary">Submit</b-button>
+      <b-button type="submit" variant="primary">Submit</b-button>&nbsp;
       <b-button type="reset" variant="danger">Reset</b-button>
+      <b-form-checkbox-group id="imageIdGroup" v-model="form.mergeImageId">
+        <b-container fluid>
+          <b-row v-for="(row, idx) in rows" :key="idx">
+            <b-col v-for="param in row" :key="param._id">
+              <b-form-checkbox :value="param._id" />
+              {{param.tags}}
+              <b-img
+                v-if="isImage(param.fileName)"
+                :src="fileUrl(param._id)"
+                fluid
+                thumbnail
+                v-b-popover.hover.top="'Click for detail!'"
+                @click="showDetail(param)"
+              />
+              <div v-else-if="isPdf(param.fileName)" class="embed-responsive embed-responsive-1by1">
+                <iframe class="embed-responsive-item" :src="fileUrl(param._id)"></iframe>
+              </div>
+              <div v-else-if="isExcel(param.fileName)">
+                <a
+                  class="btn btn-info"
+                  :href="fileNameUrl(param.fileName)"
+                  download
+                  target="_blank"
+                >
+                  <font-awesome-icon icon="file-excel" size="lg" />&nbsp; Excel File
+                </a>
+              </div>
+            </b-col>
+          </b-row>
+        </b-container>
+      </b-form-checkbox-group>
+      <hr />
+      <b-button variant="info" @click.prevent="moreImage">Show more...</b-button>
     </b-form>
   </div>
 </template>
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
-interface ImageParam {
-  _id: string;
-  tags: string[];
-}
-
-interface NewDocParam {
-  _id: string;
-  mergeImageId: string[];
-  tags: string[];
-}
+import { ImageParam, NewDocParam } from "./types";
 
 export default Vue.extend({
   mounted() {
@@ -56,14 +70,15 @@ export default Vue.extend({
     this.loadDefaultTags();
   },
   computed: {
-    row1(): ImageParam[] {
-      return this.ownerlessImages.slice(0, 4);
-    },
-    row2(): ImageParam[] {
-      return this.ownerlessImages.slice(4, 8);
-    },
-    row3(): ImageParam[] {
-      return this.ownerlessImages.slice(8, 12);
+    rows(): Array<Array<ImageParam>> {
+      let ret = Array<Array<ImageParam>>();
+      let start = 0;
+      while (start < this.ownerlessImages.length) {
+        let slice = this.ownerlessImages.slice(start, start + 4);
+        ret.push(slice);
+        start += 4;
+      }
+      return ret;
     }
   },
   data() {
@@ -72,10 +87,17 @@ export default Vue.extend({
       mergeImageId: [],
       tags: Array<string>()
     };
+    let selectedImageParam: ImageParam = {
+      _id: "",
+      fileName: "",
+      tags: []
+    };
+
     return {
       form,
       ownerlessImages: Array<ImageParam>(),
-      tags: Array<string>()
+      tags: Array<string>(),
+      selectedImageParam
     };
   },
   watch: {
@@ -104,10 +126,15 @@ export default Vue.extend({
     }
   },
   methods: {
-    imageUrl(id: string) {
+    fileUrl(id: string) {
       return process.env.NODE_ENV === "development"
         ? `http://localhost:9000/image/${id}`
         : `/image/${id}`;
+    },
+    fileNameUrl(fileName: string) {
+      return process.env.NODE_ENV === "development"
+        ? `http://localhost:9000/file/${fileName}`
+        : `/image/${fileName}`;
     },
     validateForm(form: NewDocParam) {
       if (form.mergeImageId.length === 0) {
@@ -145,17 +172,25 @@ export default Vue.extend({
     },
     onReset(evt: Event) {
       evt.preventDefault();
-      this.form.tags.splice(0, this.form.tags.length);
-      this.form.mergeImageId.splice(0, this.form.mergeImageId.length);
       this.loadOwnerlessImage();
-      this.loadDefaultTags();
     },
     loadOwnerlessImage() {
       axios
-        .get("/ownerless-image")
+        .get(`/ownerless-image?skip=${0}`)
         .then(res => {
           const ret = res.data;
           this.ownerlessImages.splice(0, this.ownerlessImages.length);
+          for (let id of ret) {
+            this.ownerlessImages.push(id);
+          }
+        })
+        .catch(err => alert(err));
+    },
+    moreImage() {
+      axios
+        .get(`/ownerless-image?skip=${this.ownerlessImages.length}`)
+        .then(res => {
+          const ret = res.data;
           for (let id of ret) {
             this.ownerlessImages.push(id);
           }
@@ -181,6 +216,39 @@ export default Vue.extend({
         }
       }
       return [];
+    },
+    isImage(fileName: string): boolean {
+      if (
+        fileName.endsWith("jpg") ||
+        fileName.endsWith("jpeg") ||
+        fileName.endsWith("png") ||
+        fileName.endsWith("bmp")
+      )
+        return true;
+      else return false;
+    },
+    isPdf(fileName: string): boolean {
+      return fileName.endsWith("pdf");
+    },
+    isExcel(fileName: string): boolean {
+      return fileName.endsWith("xlsx");
+    },
+    excelUrl(id: string): string {
+      return `https://view.officeapps.live.com/op/embed.aspx?src=${this.fileUrl(
+        id
+      )}`;
+    },
+    showDetail(param: ImageParam) {
+      this.selectedImageParam._id = param._id;
+      this.selectedImageParam.fileName = param.fileName;
+      this.selectedImageParam.tags.splice(
+        0,
+        this.selectedImageParam.tags.length
+      );
+      for (let tag of param.tags) {
+        this.selectedImageParam.tags.push(tag);
+      }
+      this.$bvModal.show("detailModal");
     }
   }
 });

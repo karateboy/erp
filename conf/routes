@@ -20,11 +20,14 @@ GET    /logout         controllers.Login.logout
 POST   /login          controllers.Login.authenticate
 GET    /getUserInfo    controllers.Login.getUserInfo
 POST   /authenticate   controllers.Login.authenticate
+GET    /user           controllers.Login.getUserList
 
 # Data
-GET     /ownerless-image  controllers.HomeController.getOwnerLessImage
+GET     /ownerless-image  controllers.HomeController.getOwnerLessImage(skip:Int)
 GET     /image/:id        controllers.HomeController.getImage(id)
+GET     /file/:filename   controllers.HomeController.getFile(filename)
 POST    /newDoc           controllers.HomeController.newImageDoc
 GET     /tags             controllers.HomeController.getTags
 GET     /doc/:id          controllers.HomeController.getDoc(id)
 GET     /doc              controllers.HomeController.searchDoc(tags:String, skip:Int, limit:Int)
+GET     /imageParam       controllers.HomeController.getImageParams(idList: String)

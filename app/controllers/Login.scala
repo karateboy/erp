@@ -53,4 +53,12 @@ class Login @Inject() (userDB: UserDB, cc: ControllerComponents)(implicit assets
       for(ret <- userDB.getUserById(userInfo.id))yield
         Ok(Json.toJson(ret.head))
   }
+
+  def getUserList = Authenticated.async {
+    implicit  request =>
+      for(userList <- userDB.getUserList())yield{
+        val idList = userList map { _._id}
+        Ok(Json.toJson(idList))
+      }
+  }
 }

@@ -1,14 +1,42 @@
 <template>
   <div>
     <b-form>
-      <b-form-group label="ID:">{{doc._id}}</b-form-group>
-      <b-form-group label="Tags:">{{doc.tags}}</b-form-group>
-      <b-form-group label="Date time:">{{displayLocalTime(doc.dateTime)}}</b-form-group>
-      <div class="flex-wrap flex-column">
-      <div v-for="id in doc.images" :key="id">
-        <b-img :src="imageUrl(id)" fluid thumbnail />
-      </div>
-    </div>
+      <b-form-group label-cols="4" label-cols-lg="2" label-size="lg" label="ID" label-for="ID">
+        <b-form-input id="ID" size="lg" readonly :value="_id" />
+      </b-form-group>
+      <b-form-group label-cols="4" label-cols-lg="2" label-size="lg" label="Tags" label-for="tags">
+        <b-form-tags id="tags" :value="doc.tags" disabled/>
+      </b-form-group>
+      <b-form-group
+        label-cols="4"
+        label-cols-lg="2"
+        label-size="lg"
+        label="Date Time"
+        label-for="dateTime"
+      >
+        <b-form-input id="dateTime" :value="displayLocalTime(doc.dateTime)" />
+      </b-form-group>
+
+      <b-container fluid>
+        <b-row v-for="(param, idx) in doc.imageParam" :key="idx">
+          <b-col>
+            <b-img v-if="isImage(param.fileName)" :src="fileUrl(param._id)" fluid thumbnail />
+            <div v-else-if="isPdf(param.fileName)" class="embed-responsive embed-responsive-1by1">
+              <iframe class="embed-responsive-item" :src="fileUrl(param._id)"></iframe>
+            </div>
+            <div v-else-if="isExcel(param.fileName)">
+              <a class="btn btn-info" :href="fileNameUrl(param.fileName)" download target="_blank">
+                <font-awesome-icon icon="file-excel" size="lg" />&nbsp; Excel File
+              </a>
+            </div>
+          </b-col>
+        </b-row>
+      </b-container>
+      <!-- <div class="flex-wrap flex-column">
+        <div v-for="id in doc.images" :key="id">
+          <b-img :src="imageUrl(id)" fluid thumbnail />
+        </div>
+      </div>-->
     </b-form>
   </div>
 </template>
@@ -16,61 +44,90 @@
 import Vue from "vue";
 import axios from "axios";
 import moment from "moment";
-import moment_tz from "moment-timezone";
+import { ImageParam, NewDocParam } from "./types";
+
 export default Vue.extend({
   props: ["_id"],
   mounted() {
-    this.loadDefaultTags();
     this.loadDocument();
   },
   data() {
-    let tags: string[] = [];
     return {
       doc: {
         _id: "",
-        tags: [],
+        tags: Array<string>(),
         date: 0,
         text: "",
-        images: []
-      },
-      tags,
-      docReady: false
+        images: Array<string>(),
+        imageParam: Array<ImageParam>()
+      }
     };
   },
   methods: {
-    onSubmit() {},
-    loadDefaultTags() {
-      axios
-        .get("/tags")
-        .then(res => {
-          const ret = res.data;
-          this.tags.splice(0, this.tags.length);
-          for (let id of ret) {
-            this.tags.push(id);
-          }
-        })
-        .catch(err => alert(err));
-    },
     loadDocument() {
       axios
         .get(`/doc/${this._id}`)
         .then(res => {
           const ret = res.data;
-          this.doc = Object.assign({}, this.doc, ret);
-          this.docReady = true;
+          this.doc.tags.splice(0, this.doc.tags.length);
+          for (let tag of ret.tags) {
+            this.doc.tags.push(tag);
+          }
+          this.doc.text = ret.text;
+          this.doc.images.splice(0, this.doc.images.length);
+          for (let imageId of ret.images) {
+            this.doc.images.push(imageId);
+          }
+          this.doc.imageParam.splice(0, this.doc.imageParam.length);
+          this.populateImageParam();
         })
         .catch(err => alert(err));
     },
-    displayLocalTime(dt:number) {
-      return moment(dt)
-        .tz("Asia/Bangkok")
-        .format("lll");
+    displayLocalTime(dt: number) {
+      return moment(dt).format("lll");
     },
-    imageUrl(id:string) {
+    imageUrl(id: string) {
       return process.env.NODE_ENV === "development"
         ? `http://localhost:9000/image/${id}`
         : `/image/${id}`;
     },
+    populateImageParam() {
+      axios
+        .get(`/imageParam?idList=${this.doc.images.join()}`)
+        .then(res => {
+          const ret = res.data;
+          for (let param of ret) {
+            this.doc.imageParam.push(param);
+          }
+        })
+        .catch(err => alert(err));
+    },
+    isImage(fileName: string): boolean {
+      if (
+        fileName.endsWith("jpg") ||
+        fileName.endsWith("jpeg") ||
+        fileName.endsWith("png") ||
+        fileName.endsWith("bmp")
+      )
+        return true;
+      else return false;
+    },
+    isPdf(fileName: string): boolean {
+      return fileName.endsWith("pdf");
+    },
+    isExcel(fileName: string): boolean {
+      return fileName.endsWith("xlsx");
+    },
+    fileUrl(id: string) {
+      return process.env.NODE_ENV === "development"
+        ? `http://localhost:9000/image/${id}`
+        : `/image/${id}`;
+    },
+    fileNameUrl(fileName: string) {
+      return process.env.NODE_ENV === "development"
+        ? `http://localhost:9000/file/${fileName}`
+        : `/image/${fileName}`;
+    }
   }
 });
 </script>

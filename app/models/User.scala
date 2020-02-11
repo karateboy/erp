@@ -32,12 +32,19 @@ class UserDB @Inject()(mongoDB: MongoDB) {
   }
 
 
-def getUserById (_id: String) = {
+  def getUserById(_id: String) = {
 
-  import org.mongodb.scala.model._
+    import org.mongodb.scala.model._
 
-  val f = collection.find (Filters.equal ("_id", _id) ).toFuture ()
-  f.failed.foreach (errorHandler () )
-  f
-}
+    val f = collection.find(Filters.equal("_id", _id)).toFuture()
+    f.failed.foreach(errorHandler())
+    f
+  }
+
+  def getUserList() = {
+    import org.mongodb.scala.model._
+    val f = collection.find(Filters.exists("_id")).toFuture()
+    f.failed.foreach(errorHandler())
+    f
+  }
 }
