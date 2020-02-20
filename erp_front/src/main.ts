@@ -31,6 +31,7 @@ import {
   faAddressCard, faUserCog, faTasks, faUser
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import FileUpload from "vue-upload-component"
 
 axios.defaults.withCredentials = true
 axios.defaults.baseURL = process.env.NODE_ENV === 'development' ? "http://localhost:9000/" : "/";
@@ -43,6 +44,7 @@ Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.use(BootstrapVue)
 Vue.use(VueRouter)
 Vue.use(LightBootstrap)
+Vue.component("file-upload", FileUpload)
 
 // configure router
 const router = new VueRouter({

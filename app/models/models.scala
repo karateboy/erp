@@ -1,18 +1,22 @@
 package models
+
 import com.github.nscala_time.time.Imports._
-import scala.language.implicitConversions
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
 import play.api._
+import play.api.libs.json._
+
 import scala.collection.JavaConverters._
+import scala.language.implicitConversions
 
 /**
  * @author user
  */
 
 object ModelHelper {
+
   import org.mongodb.scala.bson.BsonDateTime
+
   implicit def toDateTime(time: BsonDateTime) = new DateTime(time.getValue)
+
   implicit def toBsonDateTime(jdtime: DateTime) = new BsonDateTime(jdtime.getMillis)
 
   def main(args: Array[String]) {
@@ -57,6 +61,7 @@ object ModelHelper {
   }
 
   import org.mongodb.scala.bson._
+
   def getOptionTime(key: String)(implicit doc: Document) = {
     if (doc.get(key).isEmpty || doc(key).isNull())
       None
@@ -108,16 +113,16 @@ object ModelHelper {
     else
       Some(getArray(key, mapper))
   }
-  
+
   def isVaildPhone(phone: String) =
     phone.forall { x => x.isDigit || x == '-' || x == '(' || x == ')' || x.isSpaceChar } && !phone.isEmpty()
 
 }
 
 object ExcelTool {
+
   import org.apache.poi.openxml4j.opc._
-  import org.apache.poi.xssf.usermodel._
-  import org.apache.poi.xssf.usermodel.XSSFSheet
+  import org.apache.poi.xssf.usermodel.{XSSFSheet, _}
 
   def getIntFromCell(cell: XSSFCell) = {
     try {
@@ -145,6 +150,7 @@ object ExcelTool {
         None
     }
   }
+
   def getOptionDateFromCell(cell: XSSFCell) = {
     try {
       Some(cell.getDateCellValue)
@@ -185,6 +191,7 @@ object ExcelTool {
     true
   }
 }
+
 object EnumUtils {
   def enumReads[E <: Enumeration](enum: E): Reads[E#Value] = new Reads[E#Value] {
     def reads(json: JsValue): JsResult[E#Value] = json match {
@@ -209,35 +216,34 @@ object EnumUtils {
 
 }
 
-import org.mongodb.scala.bson.ObjectId
-import org.mongodb.scala.bson.ObjectId
+import org.bson.types.ObjectId
+
 object ObjectIdUtil {
-//  def objectIdReads: Reads[ObjectId] = new Reads[ObjectId] {
-//    def reads(json: JsValue): JsResult[ObjectId] = json match {
-//      case JsString(s) => {
-//        try {
-//          JsSuccess(new ObjectId(s))
-//        } catch {
-//          case _: NoSuchElementException => JsError(s"unexpected ObjectId")
-//        }
-//      }
-//      case _ => JsError("String value expected")
-//    }
-//  }
-//
-//  implicit def objectIdOptReads: Reads[Option[ObjectId]] = new Reads[Option[ObjectId]] {
-//    def reads(json: JsValue): JsResult[Option[ObjectId]] = json match {
-//      case JsString(s) => {
-//        try {
-//          JsSuccess(Some(new ObjectId(s)))
-//        } catch {
-//          case _: Throwable =>
-//            JsSuccess(None)
-//        }
-//      }
-//      case _ => JsSuccess(None)
-//    }
-//  }
+  implicit def objectIdReads: Reads[ObjectId] = (json: JsValue) => json match {
+    case JsString(s) => {
+      try {
+        JsSuccess(new ObjectId(s))
+      } catch {
+        case _: NoSuchElementException => JsError(s"unexpected ObjectId")
+      }
+    }
+    case _ => JsError("String value expected")
+  }
+
+  //
+  //  implicit def objectIdOptReads: Reads[Option[ObjectId]] = new Reads[Option[ObjectId]] {
+  //    def reads(json: JsValue): JsResult[Option[ObjectId]] = json match {
+  //      case JsString(s) => {
+  //        try {
+  //          JsSuccess(Some(new ObjectId(s)))
+  //        } catch {
+  //          case _: Throwable =>
+  //            JsSuccess(None)
+  //        }
+  //      }
+  //      case _ => JsSuccess(None)
+  //    }
+  //  }
   implicit def objectWrites: Writes[ObjectId] = new Writes[ObjectId] {
     def writes(v: ObjectId): JsValue = JsString(v.toHexString)
   }

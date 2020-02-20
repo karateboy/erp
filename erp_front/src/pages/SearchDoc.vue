@@ -1,10 +1,15 @@
 <template>
   <div>
     <b-form class="border">
+      <label for="start">Start:</label>
+      <b-form-datepicker id="start" v-model="form.start" class="mb-2" value-as-date></b-form-datepicker>
+      <label for="end">End:</label>
+      <b-form-datepicker id="end" v-model="form.end" class="mb-2" value-as-date></b-form-datepicker>
+
       <b-form-group label="Document tags:" label-for="tags" description="Please select tag.">
         <b-form-checkbox-group id="tags" v-model="form.tags" :options="tags"></b-form-checkbox-group>
       </b-form-group>
-      <b-button variant="primary" @click.prevent="onSubmit">Query</b-button> &nbsp;
+      <b-button variant="primary" @click.prevent="onSubmit">Query</b-button>&nbsp;
       <b-button type="reset" variant="danger" @click.prevent="onReset">Reset</b-button>
     </b-form>
     <b-card v-if="searched" class="mt-3" header="Search Result">
@@ -42,20 +47,22 @@ import moment from "moment";
 import ImageDoc from "./ImageDoc.vue";
 interface SearchForm {
   tags: string[];
+  start?: Date;
+  end?: Date;
   skip: number;
   limit: number;
 }
 
 interface ShortDocJson {
-  _id: string, 
-  tags: string[], 
-  dateTime: number  
+  _id: string;
+  tags: string[];
+  dateTime: number;
 }
 
 interface DisplayDocEntry {
-  _id: string, 
-  tags: string[], 
-  date: string  
+  _id: string;
+  tags: string[];
+  date: string;
 }
 
 export default Vue.extend({
@@ -68,6 +75,8 @@ export default Vue.extend({
   data() {
     let form: SearchForm = {
       tags: [],
+      start: undefined,
+      end: undefined,
       skip: 0,
       limit: 10
     };
@@ -80,13 +89,13 @@ export default Vue.extend({
       searchResult,
       searched: false,
       fields: ["selected", "tags", "date"],
-      selected ,
+      selected,
       docTitle: "doc title",
       docID: ""
     };
   },
   methods: {
-    onRowSelected(items : ShortDocJson[]) {
+    onRowSelected(items: ShortDocJson[]) {
       this.selected = items;
       this.docID = items[0]._id;
     },
@@ -103,21 +112,29 @@ export default Vue.extend({
     },
     onSubmit() {
       this.searched = true;
-      let workaround = {
+      this.docID = "";
+      let start = undefined;
+      if (this.form.start) start = this.form.start.getTime();
+      let end = undefined;
+      if (this.form.end) end = this.form.end.getTime();
+
+      let params = {
         tags: this.form.tags.join(","),
+        start,
+        end,
         skip: this.form.skip,
         limit: this.form.limit
       };
       axios
         .get("/doc", {
-          params: workaround
+          params
         })
         .then(res => {
           const ret = res.data;
 
           this.searchResult.splice(0, this.searchResult.length);
           for (let doc of ret) {
-            let entry : DisplayDocEntry = {
+            let entry: DisplayDocEntry = {
               _id: doc._id,
               tags: doc.tags,
               date: moment(doc.dateTime).format("lll")

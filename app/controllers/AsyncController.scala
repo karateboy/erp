@@ -1,8 +1,8 @@
 package controllers
 
 import javax.inject._
-
 import akka.actor.ActorSystem
+import models.{ConfigOps, ImageDocOps, ImageOps}
 import play.api.mvc._
 
 import scala.concurrent.duration._
@@ -24,7 +24,7 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
  * a blocking API.
  */
 @Singleton
-class AsyncController @Inject()(cc: ControllerComponents, actorSystem: ActorSystem)(implicit exec: ExecutionContext) extends AbstractController(cc) {
+class AsyncController @Inject()(cc: ControllerComponents, actorSystem: ActorSystem, imageOps: ImageOps, docOps: ImageDocOps, configOps: ConfigOps)(implicit exec: ExecutionContext) extends AbstractController(cc) {
 
   /**
    * Creates an Action that returns a plain text message after a delay
@@ -45,7 +45,5 @@ class AsyncController @Inject()(cc: ControllerComponents, actorSystem: ActorSyst
     }(actorSystem.dispatcher) // run scheduled tasks using the actor system's dispatcher
     promise.future
   }
-
-
 
 }

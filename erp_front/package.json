@@ -19,7 +19,7 @@
     "@types/moment-timezone": "^0.5.12",
     "axios": "^0.19.2",
     "bootstrap": "^4.4.1",
-    "bootstrap-vue": "^2.3.0",
+    "bootstrap-vue": "^2.5.0",
     "chartist": "^0.11.0",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
@@ -28,6 +28,7 @@
     "vue-class-component": "^7.2.2",
     "vue-property-decorator": "^8.3.0",
     "vue-router": "^3.1.5",
+    "vue-upload-component": "^2.8.20",
     "vuee": "^1.0.0-security",
     "vuex": "^3.1.2"
   },

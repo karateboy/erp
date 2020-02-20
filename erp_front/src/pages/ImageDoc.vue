@@ -5,18 +5,28 @@
         <b-form-input id="ID" size="lg" readonly :value="_id" />
       </b-form-group>
       <b-form-group label-cols="4" label-cols-lg="2" label-size="lg" label="Tags" label-for="tags">
-        <b-form-tags id="tags" :value="doc.tags" disabled/>
+        <b-form-tags id="tags" v-model="doc.tags" />
       </b-form-group>
       <b-form-group
         label-cols="4"
         label-cols-lg="2"
         label-size="lg"
-        label="Date Time"
+        label="Created:"
         label-for="dateTime"
       >
-        <b-form-input id="dateTime" :value="displayLocalTime(doc.dateTime)" />
+        <b-form-input id="dateTime" :value="displayLocalTime(doc.dateTime)" readonly />
       </b-form-group>
-
+      <file-upload
+        ref="upload"
+        v-model="files"
+        :post-action="uploadUrl"
+        put-action="/put.method"
+        @input-file="inputFile"
+        @input-filter="inputFilter"
+      >Upload Image</file-upload>
+      <b-form-group>
+        <b-button variant="info" @click.prevent="updateDoc">Update</b-button>&nbsp;
+      </b-form-group>
       <b-container fluid>
         <b-row v-for="(param, idx) in doc.imageParam" :key="idx">
           <b-col>
@@ -32,11 +42,6 @@
           </b-col>
         </b-row>
       </b-container>
-      <!-- <div class="flex-wrap flex-column">
-        <div v-for="id in doc.images" :key="id">
-          <b-img :src="imageUrl(id)" fluid thumbnail />
-        </div>
-      </div>-->
     </b-form>
   </div>
 </template>
@@ -48,8 +53,18 @@ import { ImageParam, NewDocParam } from "./types";
 
 export default Vue.extend({
   props: ["_id"],
+  components: {
+    
+  },
   mounted() {
     this.loadDocument();
+  },
+  computed: {
+    uploadUrl() {
+      let baseUrl =
+        process.env.NODE_ENV === "development" ? "http://localhost:9000/" : "/";
+      return `${baseUrl}/doc/image/${this._id}`;
+    }
   },
   data() {
     return {
@@ -69,6 +84,8 @@ export default Vue.extend({
         .get(`/doc/${this._id}`)
         .then(res => {
           const ret = res.data;
+          this.doc = Object.assign(this.doc, ret);
+          /*
           this.doc.tags.splice(0, this.doc.tags.length);
           for (let tag of ret.tags) {
             this.doc.tags.push(tag);
@@ -79,6 +96,7 @@ export default Vue.extend({
             this.doc.images.push(imageId);
           }
           this.doc.imageParam.splice(0, this.doc.imageParam.length);
+          */
           this.populateImageParam();
         })
         .catch(err => alert(err));
@@ -127,6 +145,13 @@ export default Vue.extend({
       return process.env.NODE_ENV === "development"
         ? `http://localhost:9000/file/${fileName}`
         : `/image/${fileName}`;
+    },
+    updateDoc() {
+      axios.post("/doc", this.doc).then(res => {
+        const ret = res.data;
+        if (ret.ok) this.$bvModal.msgBoxOk("Success!").catch(err => alert(err));
+        else this.$bvModal.msgBoxOk("Failed!").catch(err => alert(err));
+      });
     }
   }
 });

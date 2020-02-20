@@ -1,11 +1,16 @@
 package models
 
+import java.io.File
+import java.nio.file.{Files, Paths}
+import java.time.Instant
 import java.util.Date
 
 import javax.inject.{Inject, Singleton}
 import models.ModelHelper._
+import org.apache.commons.io.FilenameUtils
 import org.mongodb.scala.bson._
 import org.mongodb.scala.model._
+import play.api.Logger
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -66,18 +71,44 @@ class ImageOps @Inject()(mongoDB: MongoDB) {
 
   def getImagesParam(idList: Seq[ObjectId]) = {
     val projection = Projections.include("_id", "tags", "fileName")
-    val f = mongoDB.database.getCollection(NAME).find(Filters.in("_id", idList:_*))
+    val f = mongoDB.database.getCollection(NAME).find(Filters.in("_id", idList: _*))
       .projection(projection).toFuture()
     f.failed.foreach(errorHandler)
     for (docs <- f) yield {
-      val ret = for(id <- idList) yield {
-        for(found <- docs.find(doc=>doc.getObjectId("_id") == id)) yield {
+      val ret = for (id <- idList) yield {
+        for (found <- docs.find(doc => doc.getObjectId("_id") == id)) yield {
           val tags = found("tags").asArray().asScala.map(_.asString().getValue).toSeq
           val fileName = found.getString("fileName")
           ImageParam(_id = id.toHexString, tags = tags, fileName = fileName)
         }
       }
-      ret flatMap {x=>x}
+      ret flatMap { x => x }
     }
+  }
+
+  def importFile(file: File, tags: Seq[String], owner:Option[ObjectId]) = {
+    val fileExt = FilenameUtils.getExtension(file.getName);
+    val imgId = new ObjectId()
+    val newFileName = s"${imgId.toHexString}.${fileExt}"
+    Logger.debug(newFileName)
+    val extTags: Seq[String] =
+      if (fileExt == "pdf")
+        tags :+ "pdf"
+      else if (fileExt == "jpg" || fileExt == "jpeg" || fileExt == "png")
+        tags :+ "Image"
+      else if (fileExt == "xlsx")
+        tags :+ "Excel"
+      else
+        tags
+
+
+    val img = Image(imgId, newFileName, extTags, Date.from(Instant.ofEpochMilli(file.lastModified())),
+      Files.readAllBytes(Paths.get(file.getAbsolutePath)))
+
+    val f1 = collection.insertOne(img).toFuture()
+    f1.failed.foreach(errorHandler)
+    for (ret <- f1)
+      yield
+        imgId
   }
 }

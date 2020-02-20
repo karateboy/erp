@@ -2,15 +2,17 @@ package controllers
 
 import java.io.{File, FileOutputStream}
 import java.nio.file.Files
+import java.time.LocalDateTime
 import java.util.Date
 
 import javax.inject._
 import models._
 import org.bson.types.ObjectId
+import org.mongodb.scala.bson.conversions.Bson
 import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc._
-
+import models.ModelHelper._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -19,8 +21,8 @@ import scala.concurrent.Future
  * application's home page.
  */
 @Singleton
-class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, docOps: ImageDocOps, configOps: ConfigOps)(implicit assetsFinder: AssetsFinder)
-  extends Authentication(cc) {
+class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, docOps: ImageDocOps, configOps: ConfigOps)
+                              (implicit assetsFinder: AssetsFinder) extends Authentication(cc) {
 
   /**
    * Create an Action to render an HTML page with a welcome message.
@@ -96,8 +98,11 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, doc
 
   case class NewImageDocParam(_id: String, mergeImageId: Seq[String], tags: Seq[String])
 
+
   def newImageDoc() = Authenticated.async(cc.parsers.json) {
     implicit request =>
+      val creatorInfo = request.user
+      import java.time._
       implicit val paramReads = Json.reads[NewImageDocParam]
       val paramRet = request.body.validate[NewImageDocParam]
       paramRet.fold(
@@ -106,7 +111,7 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, doc
             Logger.error("")
             BadRequest(Json.obj("ok" -> false, "msg" -> JsError.toJson(error)))
           }
-        , param => {
+        , valid = param => {
 
           import org.mongodb.scala.bson._
 
@@ -119,8 +124,10 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, doc
             new ObjectId(_)
           }
           val updateOwnerF = imageOps.updateOwner(_id, images)
+          val now = LocalDateTime.now()
+          val createdMsg = s"${LocalDateTime.now()} ${creatorInfo.name} created."
           val doc = ImageDoc(_id, param.tags, new Date(), "",
-            images)
+            images, Seq(createdMsg))
 
           for {
             retImageUpdate <- updateOwnerF
@@ -151,20 +158,29 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, doc
     }
   }
 
-  def searchDoc(tags: String, skip: Int, limit: Int) = Authenticated.async {
+  def searchDoc(tags: String, start: Option[Long], end: Option[Long], skip: Int, limit: Int) = Authenticated.async {
 
     import org.mongodb.scala.model._
 
-    val tagFilter =
+    val tagFilter: Option[Bson] =
       if (tags.isEmpty)
-        Filters.exists("_id")
+        Some(Filters.exists("_id"))
       else {
         val tagList = tags.split(",")
-        Filters.all("tags", tagList: _*)
+        Some(Filters.all("tags", tagList: _*))
       }
 
+    val startFilter: Option[Bson] = start map { dt =>
+      Filters.gte("date", new Date(dt))
+    }
 
-    for (docList <- docOps.query(tagFilter)(skip)(limit)) yield {
+    val endFilter = end map { dt =>
+      Filters.lte("date", new Date(dt))
+    }
+
+
+    val filter = Filters.and(Seq(tagFilter, startFilter, endFilter).flatten: _*)
+    for (docList <- docOps.query(filter)(skip)(limit)) yield {
       //val ids = docList map ( doc=> doc("_id").asObjectId().getValue.toHexString)
       implicit val write = Json.writes[ShortDocJson]
       Ok(Json.toJson(docList))
@@ -173,9 +189,49 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, doc
 
   def getImageParams(idList: String) = Authenticated.async {
     implicit val writes = Json.writes[ImageParam]
-    val objIdList = idList.split(",") map { new ObjectId(_)}
+    val objIdList = idList.split(",") map {
+      new ObjectId(_)
+    }
     val f = imageOps.getImagesParam(objIdList)
-    for(ret <- f) yield
+    for (ret <- f) yield
       Ok(Json.toJson(ret))
+  }
+
+  def upsertDoc() = Authenticated.async(cc.parsers.json) {
+    implicit request =>
+      val updater = request.user
+      implicit val reads = Json.reads[ImageDoc]
+      import models.ObjectIdUtil._
+      val docRet = request.body.validate[ImageDoc]
+      docRet.fold(
+        error =>
+          Future {
+            Logger.error(JsError.toJson(error).toString())
+            BadRequest(Json.obj("ok" -> false, "msg" -> JsError.toJson(error)))
+          }
+        , valid = doc => {
+          val now = LocalDateTime.now()
+          val updateMsg = s"${LocalDateTime.now()} ${updater.name} updated."
+          doc.log = updateMsg +: doc.log
+          for (ret <- docOps.upsert(doc)) yield
+            Ok(Json.obj("ok" -> (ret.getModifiedCount == 1)))
+        })
+  }
+
+  def attachImageToDoc(docIdStr: String) = Authenticated(parse.multipartFormData) {
+    implicit request =>
+      val updater = request.user
+      request.body.file("image").map { picture =>
+        import java.io.File
+        val filename: String = picture.filename
+        val contentType = picture.contentType
+        val logEntry = s"${updater.name} upload ${filename}"
+        val docId = new ObjectId(docIdStr)
+        val imgIdF = imageOps.importFile(new File(filename), Seq("upload"), Some(docId))
+        val imgId = waitReadyResult(imgIdF)
+        docOps.attachImage(docId, imgId, logEntry)
+      }
+
+      Ok(Json.obj("ok" -> true))
   }
 }

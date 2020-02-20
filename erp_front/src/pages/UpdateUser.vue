@@ -1,81 +1,75 @@
 <template>
   <b-form>
-    <b-form-group label-cols="4" label-cols-lg="2" label-size="lg" label="User:" label-for="user">
-      <b-button-group id="user">
-        <b-button
-          v-for="user in userList"
-          :key="user"
-          @click="form.user=user"
-          :class="{ active: user==form.user}"
-          variant="outline-info"
-        >{{user}}</b-button>
-      </b-button-group>
-    </b-form-group>
     <b-form-group
       label-cols="4"
       label-cols-lg="2"
       label-size="lg"
-      label="password"
-      label-for="password"
+      label="User to be deleted:"
+      label-for="update-user"
     >
-      <b-form-input id="password" type="password" size="lg" v-model="form.password" />
+      <b-form-radio-group
+        id="update-user"
+        v-model="form.user"
+        :options="userList"
+        :state="userState"
+      >
+        <b-form-invalid-feedback :state="userState">Must select one user</b-form-invalid-feedback>
+      </b-form-radio-group>
     </b-form-group>
-    <b-form-group
-      label-cols="4"
-      label-cols-lg="2"
-      label-size="lg"
-      label="retype password"
-      label-for="password2"
-    >
-      <b-form-input id="password2" type="password" size="lg" v-model="form.password2" />
-    </b-form-group>
-
-    <b-form-group label-cols="4" label-cols-lg="2" label-size="lg" label="Group" label-for="group">
-      <b-button-group id="group">
-        <b-button
-          v-for="(group) in groupList"
-          :key="group"
-          @click="form.group=group"
-          :class="{ active: group==form.group}"
-          variant="outline-info"
-        >{{group}}</b-button>
-      </b-button-group>
-    </b-form-group>
-    <hr />
-    <b-button type="submit" variant="primary">Delete User</b-button>
+    <hr />    
+    <user v-if="userState" :isNew="false" :_id="form.user" :key="form.user"></user>
   </b-form>
 </template>
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
+import User from "./User.vue"
+interface Entry {
+  text: string;
+  value: string;
+}
+
 export default Vue.extend({
+  components:{
+    User
+  },
   mounted() {
-    axios
-      .get("/user")
-      .then(res => {
-        const ret = res.data;
-        this.userList.splice(0, this.userList.length);
-        for (let usr of ret) {
-          this.userList.push(usr);
-        }
-      })
-      .catch(err => alert(err));
+    this.getUserList();
   },
   data() {
     return {
       form: {
-        user: "",
-        password:"",
-        password2:"",
-        group:""
+        user: ""
       },
-      userList: Array<string>(),
-      groupList: ["admin", "RD", "Factory", "QC"]
+      userList: Array<Entry>()
     };
   },
-  methods: {
-    onSubmit(evt: Event) {
-      evt.preventDefault();
+  computed: {
+    userState() {
+      if (!this.form.user) return false;
+      else return true;
+    }
+  },
+  methods: { 
+    getUserList() {
+      axios
+        .get("/user")
+        .then(res => {
+          const ret = res.data;
+          this.userList.splice(0, this.userList.length);
+          for (let usr of ret) {
+            let text: string;
+            if (usr.name) text = usr.name;
+            else text = usr._id;
+
+            let entry = {
+              text,
+              value: usr._id
+            };
+            this.userList.push(entry);
+          }
+        })
+        .catch(err => alert(err));
     }
   }
 });

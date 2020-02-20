@@ -14,7 +14,7 @@
         <i class="nc-icon nc-zoom-split"></i>
         <p>Search Document</p>
       </sidebar-link>
-      <sidebar-link to="/admin/userManagement">        
+      <sidebar-link to="/admin/userManagement" v-if="isAdmin">
         <i class="nc-icon nc-circle-09"></i>
         <p>User Management</p>
       </sidebar-link>
@@ -43,12 +43,18 @@ import TopNavbar from "./TopNavbar.vue";
 import ContentFooter from "./ContentFooter.vue";
 import DashboardContent from "./Content.vue";
 import MobileMenu from "./MobileMenu.vue";
+import { mapState } from "vuex";
 export default {
   components: {
     TopNavbar,
-    ContentFooter,
     DashboardContent,
     MobileMenu
+  },
+  computed: {
+    ...mapState(["userInfo"]),
+    isAdmin() {
+      return this.userInfo.groups.indexOf("admin") !== -1;
+    }
   },
   methods: {
     toggleSidebar() {

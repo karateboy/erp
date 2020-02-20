@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class ImageDoc(_id: ObjectId, tags: Seq[String], date: Date, text: String,
-                    images: Seq[ObjectId])
+                    images: Seq[ObjectId], var log: Seq[String])
 
 case class ShortDocJson(_id: String, tags: Seq[String], dateTime: Long)
 
@@ -60,6 +60,22 @@ class ImageDocOps @Inject()(configOps: ConfigOps, mongoDB: MongoDB) {
     val configF = configOps.updateTags(doc.tags)
     configF.failed.foreach(errorHandler)
     val f = collection.insertOne(doc).toFuture()
+    f.failed.foreach(errorHandler)
+    f
+  }
+
+  def upsert(doc: ImageDoc) = {
+    val f = collection.replaceOne(Filters.equal("_id", doc._id), doc, ReplaceOptions().upsert(true)).toFuture()
+    f.failed.foreach(errorHandler)
+    f
+  }
+
+  def attachImage(docId:ObjectId, imageId:ObjectId, logEntry:String) = {
+    val updates = Updates.combine(
+      Updates.addToSet("images", imageId),
+      Updates.pushEach("log", PushOptions().position(0), logEntry)
+    )
+    val f = collection.findOneAndUpdate(Filters.equal("_id", docId), updates).toFuture()
     f.failed.foreach(errorHandler)
     f
   }

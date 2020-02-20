@@ -7,10 +7,10 @@ import play.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class Group(_id: String, groups: Seq[String])
+case class Group(_id: String, name:String)
 
 @Singleton
-class GroupDB @Inject()(mongoDB: MongoDB) {
+class GroupOps @Inject()(mongoDB: MongoDB) {
 
   import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
   import org.mongodb.scala.bson.codecs.DEFAULT_CODEC_REGISTRY
@@ -25,16 +25,19 @@ class GroupDB @Inject()(mongoDB: MongoDB) {
   for (count <- collection.countDocuments().toFuture()) {
     //Insert default group
     if (count == 0) {
-      collection.insertOne(Group("admin", Seq.empty[String])).toFuture()
+      collection.insertOne(Group("admin", "admin")).toFuture()
     }
   }
 
-
+  import org.mongodb.scala.model._
   def getGroupById(_id: String) = {
-
-    import org.mongodb.scala.model._
-
     val f = collection.find(Filters.equal("_id", _id)).toFuture()
+    f.failed.foreach(errorHandler())
+    f
+  }
+
+  def getGroupList() = {
+    val f = collection.find(Filters.exists("_id")).toFuture()
     f.failed.foreach(errorHandler())
     f
   }
