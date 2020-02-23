@@ -221,13 +221,16 @@ class HomeController @Inject()(cc: ControllerComponents, imageOps: ImageOps, doc
   def attachImageToDoc(docIdStr: String) = Authenticated(parse.multipartFormData) {
     implicit request =>
       val updater = request.user
+      Logger.info("handle attached upload")
       request.body.file("image").map { picture =>
         import java.io.File
         val filename: String = picture.filename
         val contentType = picture.contentType
-        val logEntry = s"${updater.name} upload ${filename}"
+
+        val logEntry = s"${LocalDateTime.now()} ${updater.name} upload ${filename}"
         val docId = new ObjectId(docIdStr)
-        val imgIdF = imageOps.importFile(new File(filename), Seq("upload"), Some(docId))
+        val imgIdF = imageOps.importPath(path = picture.ref.path,
+          tags = Seq("upload"), owner = Some(docId), originalName = filename)
         val imgId = waitReadyResult(imgIdF)
         docOps.attachImage(docId, imgId, logEntry)
       }

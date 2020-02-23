@@ -1,7 +1,7 @@
 package models
 
 import java.io.File
-import java.nio.file.{Files, Paths}
+import java.nio.file.{Files, Path, Paths}
 import java.time.Instant
 import java.util.Date
 
@@ -33,7 +33,7 @@ class ImageOps @Inject()(mongoDB: MongoDB) {
 
   val codecRegistry = fromRegistries(DEFAULT_CODEC_REGISTRY, fromProviders(imageProvider))
 
-  val NAME = "image"
+  val NAME = "images"
   val collection = mongoDB.database.getCollection[Image](NAME).withCodecRegistry(codecRegistry)
   collection.createIndex(Indexes.ascending("tags")).toFuture().failed.foreach(errorHandler)
   collection.createIndex(Indexes.ascending("date")).toFuture().failed.foreach(errorHandler)
@@ -86,8 +86,8 @@ class ImageOps @Inject()(mongoDB: MongoDB) {
     }
   }
 
-  def importFile(file: File, tags: Seq[String], owner:Option[ObjectId]) = {
-    val fileExt = FilenameUtils.getExtension(file.getName);
+  def importPath(path: Path, tags: Seq[String], owner: Option[ObjectId], originalName: String) = {
+    val fileExt = FilenameUtils.getExtension(originalName);
     val imgId = new ObjectId()
     val newFileName = s"${imgId.toHexString}.${fileExt}"
     Logger.debug(newFileName)
@@ -102,8 +102,8 @@ class ImageOps @Inject()(mongoDB: MongoDB) {
         tags
 
 
-    val img = Image(imgId, newFileName, extTags, Date.from(Instant.ofEpochMilli(file.lastModified())),
-      Files.readAllBytes(Paths.get(file.getAbsolutePath)))
+    val img = Image(_id = imgId, fileName = newFileName, tags = extTags, date = Date.from(Instant.ofEpochMilli(path.toFile.lastModified())),
+      content = Files.readAllBytes(path), owner = owner)
 
     val f1 = collection.insertOne(img).toFuture()
     f1.failed.foreach(errorHandler)
@@ -111,4 +111,5 @@ class ImageOps @Inject()(mongoDB: MongoDB) {
       yield
         imgId
   }
+
 }

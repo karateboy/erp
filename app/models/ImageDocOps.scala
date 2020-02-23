@@ -25,7 +25,7 @@ class ImageDocOps @Inject()(configOps: ConfigOps, mongoDB: MongoDB) {
 
   val codecRegistry = fromRegistries(fromProviders(classOf[ImageDoc]), DEFAULT_CODEC_REGISTRY)
 
-  val NAME = "imageDoc"
+  val NAME = "docs"
   val collection = mongoDB.database.getCollection[ImageDoc](NAME).withCodecRegistry(codecRegistry)
   collection.createIndex(Indexes.ascending("tags")).toFuture().failed.foreach(errorHandler)
   collection.createIndex(Indexes.ascending("date")).toFuture().failed.foreach(errorHandler)

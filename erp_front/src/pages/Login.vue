@@ -152,6 +152,7 @@ export default Vue.extend({
             })
             .catch(err => {
               alert(err);
+              this.logining = false;
             });
         })
         .catch(err => alert(err));      

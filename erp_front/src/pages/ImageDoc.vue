@@ -16,22 +16,20 @@
       >
         <b-form-input id="dateTime" :value="displayLocalTime(doc.dateTime)" readonly />
       </b-form-group>
-      <file-upload
-        ref="upload"
-        v-model="files"
-        :post-action="uploadUrl"
-        put-action="/put.method"
-        @input-file="inputFile"
-        @input-filter="inputFilter"
-      >Upload Image</file-upload>
+      <b-form-file
+        name="image"
+        v-model="file"
+        placeholder="Choose a file or drop it here to upload..."
+        drop-placeholder="Drop file here..."
+        @input="startUpload"
+      ></b-form-file>
       <b-form-group>
-        <b-button variant="info" @click.prevent="updateDoc">Update</b-button>&nbsp;
+        <b-button variant="info" @click.prevent="updateDoc">Update</b-button>
       </b-form-group>
       <b-container fluid>
         <b-row v-for="(param, idx) in doc.imageParam" :key="idx">
           <b-col>
-            <b-img v-if="isImage(param.fileName)" :src="fileUrl(param._id)" fluid thumbnail />
-            <div v-else-if="isPdf(param.fileName)" class="embed-responsive embed-responsive-1by1">
+            <div v-if="isPdf(param.fileName)" class="embed-responsive embed-responsive-1by1">
               <iframe class="embed-responsive-item" :src="fileUrl(param._id)"></iframe>
             </div>
             <div v-else-if="isExcel(param.fileName)">
@@ -39,23 +37,31 @@
                 <font-awesome-icon icon="file-excel" size="lg" />&nbsp; Excel File
               </a>
             </div>
+            <b-img v-else :src="fileUrl(param._id)" fluid thumbnail />
           </b-col>
         </b-row>
       </b-container>
     </b-form>
   </div>
 </template>
+<style>
+.dragUpload {
+  height: 50px;
+  background-color: aqua;
+}
+</style>
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
 import moment from "moment";
 import { ImageParam, NewDocParam } from "./types";
 
+interface upload {
+  active: boolean;
+}
+
 export default Vue.extend({
   props: ["_id"],
-  components: {
-    
-  },
   mounted() {
     this.loadDocument();
   },
@@ -63,10 +69,11 @@ export default Vue.extend({
     uploadUrl() {
       let baseUrl =
         process.env.NODE_ENV === "development" ? "http://localhost:9000/" : "/";
-      return `${baseUrl}/doc/image/${this._id}`;
+      return `${baseUrl}doc/image/${this._id}`;
     }
   },
   data() {
+    let file: File | null = null;
     return {
       doc: {
         _id: "",
@@ -75,7 +82,8 @@ export default Vue.extend({
         text: "",
         images: Array<string>(),
         imageParam: Array<ImageParam>()
-      }
+      },
+      file
     };
   },
   methods: {
@@ -114,6 +122,7 @@ export default Vue.extend({
         .get(`/imageParam?idList=${this.doc.images.join()}`)
         .then(res => {
           const ret = res.data;
+          console.log(ret);
           for (let param of ret) {
             this.doc.imageParam.push(param);
           }
@@ -152,6 +161,25 @@ export default Vue.extend({
         if (ret.ok) this.$bvModal.msgBoxOk("Success!").catch(err => alert(err));
         else this.$bvModal.msgBoxOk("Failed!").catch(err => alert(err));
       });
+    },
+    startUpload() {
+      let formData = new FormData();
+      let file = (this.file as unknown) as File;
+      formData.append("image", file);
+      axios
+        .post(this.uploadUrl, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        })
+        .then(res => {
+          const ret = res.data;
+          if (ret.ok){
+            this.$bvModal.msgBoxOk("Success!").catch(err => alert(err));
+            this.loadDocument();
+          }
+            
+        });
     }
   }
 });
