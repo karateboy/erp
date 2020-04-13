@@ -2,19 +2,19 @@
   <div class="wrapper">
     <side-bar>
       <mobile-menu slot="content"></mobile-menu>
-      <sidebar-link to="/admin/overview">
+      <sidebar-link :to="{ name: 'Overview'}">
         <i class="nc-icon nc-chart-pie-35"></i>
         <p>Dashboard</p>
       </sidebar-link>
-      <sidebar-link to="/admin/merge">
+      <sidebar-link :to="{ name: 'MergeDoc'}">
         <i class="nc-icon nc-settings-gear-64"></i>
         <p>Merge Document</p>
       </sidebar-link>
-      <sidebar-link to="/admin/search">
+      <sidebar-link :to="{ name: 'SearchDoc'}">
         <i class="nc-icon nc-zoom-split"></i>
         <p>Search Document</p>
       </sidebar-link>
-      <sidebar-link to="/admin/userManagement" v-if="isAdmin">
+      <sidebar-link :to="{ name: 'UserManagement'}" v-if="isAdmin">
         <i class="nc-icon nc-circle-09"></i>
         <p>User Management</p>
       </sidebar-link>

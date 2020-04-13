@@ -15,7 +15,7 @@
  */
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import BootstrapVue from 'bootstrap-vue'
+import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import axios from 'axios'
 import App from './App.vue'
 import LightBootstrap from './light-bootstrap-main'
@@ -40,6 +40,7 @@ library.add(faLayerGroup, faCompass, faAngleDown, faAngleRight, faSearchPlus,
   faUserCog, faTasks, faUser)
 // plugin setup
 Vue.component('font-awesome-icon', FontAwesomeIcon)
+Vue.use(BootstrapVue)
 Vue.use(BootstrapVue)
 Vue.use(VueRouter)
 Vue.use(LightBootstrap)

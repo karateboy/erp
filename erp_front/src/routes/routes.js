@@ -9,24 +9,26 @@ import MergeDoc from "@/pages/MergeDoc"
 import SearchDoc from "@/pages/SearchDoc"
 import Login from "@/pages/Login"
 import UserManagement from "@/pages/UserManagement"
+
+//Junitay
+import CustomerPage from '../pages/Customer.vue';
+import ProductPage from '../pages/Product.vue';
+import OrderPage from '../pages/Order.vue';
+import WorkPage from '../pages/Work.vue';
+import MaterialPage from '../pages/Material.vue';
+
 const routes = [
-  {
-    path: '/',
-    component: DashboardLayout,
-    redirect: '/admin/overview'
-  },
   {
     path: "/login",
     name: "login",
     component: Login
   },
   {
-    path: '/admin',
+    path: '/',
     component: DashboardLayout,
-    redirect: '/admin/overview',
     children: [
       {
-        path: 'overview',
+        path: '',
         name: 'Overview',
         component: Overview
       },
@@ -47,8 +49,79 @@ const routes = [
       },
       {
         path: 'userManagement',
-        name: 'userManagement',
+        name: 'UserManagement',
         component: UserManagement
+      },
+      {
+        path: 'customer',
+        name: 'Customer',
+        component: CustomerPage,
+        children: [
+          {
+            path: ':id',
+            name: 'CustomerDocument',
+          }
+        ]
+      },
+      {
+        path: 'product',
+        name: "Product",
+        component: ProductPage,
+        children: [
+          {
+            path: 'customer/:id',
+            name: 'ProductCustomerList',
+          },
+          {
+            path: ':id',
+            name: 'ProductDocument',
+          }
+        ]
+      },
+      {
+        path: 'order',
+        name: "Order",
+        component: OrderPage,
+        children: [
+          {
+            path: 'customer/:id',
+            name: 'OrderCustomerList',
+          },
+          {
+            path: ':id',
+            name: 'OrderDocument',
+          }
+        ]
+      },
+      {
+        path: 'work',
+        name: "Work",
+        component: WorkPage,
+        children: [
+          {
+            path: 'customer/:id',
+            name: 'WorkCustomerList',
+          },
+          {
+            path: ':id',
+            name: 'WorkDocument',
+          }
+        ]
+      },
+      {
+        path: 'material',
+        name: "Material",
+        component: MaterialPage,
+        children: [
+          {
+            path: 'customer/:id',
+            name: 'MaterialCustomerList',
+          },
+          {
+            path: ':id',
+            name: 'MaterialDocument',
+          }
+        ]
       }
     ]
   },
