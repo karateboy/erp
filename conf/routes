@@ -35,3 +35,6 @@ GET     /doc              controllers.HomeController.searchDoc(tags:String, star
 POST    /doc              controllers.HomeController.upsertDoc
 GET     /imageParam       controllers.HomeController.getImageParams(idList: String)
 POST    /doc/image/:docId controllers.HomeController.attachImageToDoc(docId)
+
+#JDB
+GET     /Customer         controllers.JdbController.listCustomer

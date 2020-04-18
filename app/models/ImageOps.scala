@@ -28,7 +28,7 @@ class ImageOps @Inject()(mongoDB: MongoDB) {
 
   val imageProvider = Macros.createCodecProvider[Image]()
 
-  import org.mongodb.scala.bson.codecs.DEFAULT_CODEC_REGISTRY
+  import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
   import org.bson.codecs.configuration.CodecRegistries.{fromRegistries, fromProviders}
 
   val codecRegistry = fromRegistries(DEFAULT_CODEC_REGISTRY, fromProviders(imageProvider))

@@ -20,7 +20,7 @@ case class ShortDocJson(_id: String, tags: Seq[String], dateTime: Long)
 class ImageDocOps @Inject()(configOps: ConfigOps, mongoDB: MongoDB) {
 
   import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
-  import org.mongodb.scala.bson.codecs.DEFAULT_CODEC_REGISTRY
+  import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
   import org.mongodb.scala.bson.codecs.Macros._
 
   val codecRegistry = fromRegistries(fromProviders(classOf[ImageDoc]), DEFAULT_CODEC_REGISTRY)

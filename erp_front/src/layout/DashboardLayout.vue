@@ -2,10 +2,6 @@
   <div class="wrapper">
     <side-bar>
       <mobile-menu slot="content"></mobile-menu>
-      <sidebar-link :to="{ name: 'Overview'}">
-        <i class="nc-icon nc-chart-pie-35"></i>
-        <p>Dashboard</p>
-      </sidebar-link>
       <sidebar-link :to="{ name: 'MergeDoc'}">
         <i class="nc-icon nc-settings-gear-64"></i>
         <p>Merge Document</p>

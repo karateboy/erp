@@ -1,6 +1,10 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
+import customer from "./customer"
+import order from "./order"
+import material from "./material"
+import product from "./product"
+import work from "./work"
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -29,5 +33,10 @@ export default new Vuex.Store({
     }
   },
   modules: {
+    customer,
+    material,
+    order,
+    product,
+    work
   }
 })

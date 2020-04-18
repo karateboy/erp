@@ -16,32 +16,32 @@
           </b-button>
           <b-collapse id="nav-collapse" is-nav>
             <b-navbar-nav>
-              <b-nav-item href="/customer">Customer</b-nav-item>
-              <b-nav-item href="/product">Product</b-nav-item>
-              <b-nav-item href="/order">Order</b-nav-item>
-              <b-nav-item href="/work">Work</b-nav-item>
+              <b-nav-item to="Customer">Customer</b-nav-item>
+              <b-nav-item to="product">Product</b-nav-item>
+              <b-nav-item to="Order">Order</b-nav-item>
+              <b-nav-item to="Work">Work</b-nav-item>
               <b-nav-item-dropdown text="Order">
-                <b-dropdown-item href="/order">Order</b-dropdown-item>
-                <b-dropdown-item href="/work">Work</b-dropdown-item>
-                <b-dropdown-item href="/planning">Planning</b-dropdown-item>
-                <b-dropdown-item href="/printing">Printing</b-dropdown-item>
+                <b-dropdown-item to="Order">Order</b-dropdown-item>
+                <b-dropdown-item to="Work">Work</b-dropdown-item>
+                <b-dropdown-item to="Planning">Planning</b-dropdown-item>
+                <b-dropdown-item to="Printing">Printing</b-dropdown-item>
               </b-nav-item-dropdown>
               <b-nav-item-dropdown text="Store">
-                <b-dropdown-item href="/store">Store</b-dropdown-item>
-                <b-dropdown-item href="/material">Material</b-dropdown-item>
-                <b-dropdown-item href="/product/store">Product Store</b-dropdown-item>
+                <b-dropdown-item to="Store">Store</b-dropdown-item>
+                <b-dropdown-item to="Material">Material</b-dropdown-item>
+                <b-dropdown-item to="/product/store">Product Store</b-dropdown-item>
               </b-nav-item-dropdown>
 
               <b-nav-item-dropdown text="Production">
-                <b-dropdown-item href="/dicut">Dicut</b-dropdown-item>
-                <b-dropdown-item href="/rubber">Rubber</b-dropdown-item>
-                <b-dropdown-item href="/oven">Oven</b-dropdown-item>
+                <b-dropdown-item to="Dicut">Dicut</b-dropdown-item>
+                <b-dropdown-item to="Rubber">Rubber</b-dropdown-item>
+                <b-dropdown-item to="Oven">Oven</b-dropdown-item>
               </b-nav-item-dropdown>
               <b-nav-item-dropdown text="ISO">
-                <b-dropdown-item href="/iso">ISO</b-dropdown-item>
-                <b-dropdown-item href="/qc">QC</b-dropdown-item>
-                <b-dropdown-item href="/qa">QA</b-dropdown-item>
-                <b-dropdown-item href="/logistics">Logistics</b-dropdown-item>
+                <b-dropdown-item to="/iso">ISO</b-dropdown-item>
+                <b-dropdown-item to="/qc">QC</b-dropdown-item>
+                <b-dropdown-item to="/qa">QA</b-dropdown-item>
+                <b-dropdown-item to="/logistics">Logistics</b-dropdown-item>
               </b-nav-item-dropdown>
             </b-navbar-nav>
 

@@ -99,25 +99,16 @@
     </b-card>
   </b-container>
 </template>
-
-
-<!--
-	***
-
-	VUE scripts
-
-	***
--->
-<script>
+<script lang="ts">
 import { mapActions, mapGetters } from "vuex";
 const namespaced = "customer";
-
-import VueJsonPretty from "vue-json-pretty";
+const VueJsonPretty = require("vue-json-pretty");
 import CustomInput from "@/components/form/CustomInput.vue";
 import CustomerProductCode from "@/components/form/CustomerProductCode.vue";
 
-export default {
-  components: {
+import Vue from 'vue'
+export default Vue.extend({
+    components: {
     VueJsonPretty,
     CustomInput,
     CustomerProductCode
@@ -144,17 +135,5 @@ export default {
   computed: {
     ...mapGetters(namespaced, ["appDocument"])
   }
-};
+})
 </script>
-
-
-
-<!--
-	***
-
-	BELOW IS STYLING OF WEBPAGE SCOPED
-	
-	***
-!-->
-<style scoped>
-</style>

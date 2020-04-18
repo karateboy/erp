@@ -5,10 +5,10 @@ import NotFound from '../pages/NotFoundPage.vue'
 // Admin pages
 import Overview from 'src/pages/Overview.vue'
 import Notifications from 'src/pages/Notifications.vue'
-import MergeDoc from "@/pages/MergeDoc"
-import SearchDoc from "@/pages/SearchDoc"
-import Login from "@/pages/Login"
-import UserManagement from "@/pages/UserManagement"
+import MergeDoc from "../pages/MergeDoc.vue"
+import SearchDoc from "../pages/SearchDoc.vue"
+import Login from "../pages/Login.vue"
+import UserManagement from "../pages/UserManagement.vue"
 
 //Junitay
 import CustomerPage from '../pages/Customer.vue';
@@ -16,6 +16,10 @@ import ProductPage from '../pages/Product.vue';
 import OrderPage from '../pages/Order.vue';
 import WorkPage from '../pages/Work.vue';
 import MaterialPage from '../pages/Material.vue';
+
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+Vue.use(VueRouter)
 
 const routes = [
   {
@@ -125,16 +129,15 @@ const routes = [
       }
     ]
   },
-  { path: '*', component: NotFound }
+  /*{ path: '*', component: NotFound }*/
 ]
 
-/**
- * Asynchronously load view (Webpack Lazy loading compatible)
- * The specified component must be inside the Views folder
- * @param  {string} name  the filename (basename) of the view to load.
-function view(name) {
-   var res= require('../components/Dashboard/Views/' + name + '.vue');
-   return res;
-};**/
 
-export default routes
+const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
+  routes
+})
+
+export default router
+

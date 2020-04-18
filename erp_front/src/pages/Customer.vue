@@ -1,30 +1,42 @@
 <template>
   <b-container fluid>
-    <h1>Customer {{pageView}} @ {{ $route.fullPath }}</h1>
-    <list-view v-if="pageView === 'list'"></list-view>
-    <document-view v-else-if="pageView === 'document'"></document-view>
+    <b-row>
+      <b-col>
+        <h1>Customer {{pageView}} @ {{ $route.fullPath }}</h1>
+      </b-col>
+    </b-row>
+    <b-row v-if="pageView === 'list'">
+      <b-col>
+        <list-view></list-view>
+      </b-col>
+    </b-row>
+    <b-row v-if="pageView === 'document'">
+      <b-col>
+        <document-view></document-view>
+      </b-col>
+    </b-row>
   </b-container>
 </template>
+<style scoped>
+h1 {
+  font-weight: bold;
+  padding: 0 15px;
+}
+</style>
 
-
-
-<!--
-	***
-	VUE scripts
-	***
--->
-<script>
+<script lang="ts">
+import Vue from "vue";
 import DocumentView from "@/components/CustomerDocument.vue";
 import ListView from "@/components/CustomerList.vue";
 
-export default {
+export default Vue.extend({
   components: {
     DocumentView,
     ListView
   },
   data() {
     return {
-      pageView: "invalid"
+      pageView: "list"
     };
   },
   mounted() {
@@ -35,23 +47,7 @@ export default {
       this.$route.params.id.length > 0
     ) {
       this.pageView = "document";
-    } else {
-      this.pageView = "invalid";
     }
   }
-};
+});
 </script>
-
-
-
-<!--
-	***
-	BELOW IS STYLING OF WEBPAGE SCOPED
-	***
-	!-->
-<style scoped>
-h1 {
-  font-weight: bold;
-  padding: 0 15px;
-}
-</style>

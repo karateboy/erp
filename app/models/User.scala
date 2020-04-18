@@ -19,7 +19,7 @@ case class User(var _id: String, password: String, groups: Seq[String], name: St
 class UserDB @Inject()(mongoDB: MongoDB) {
 
   import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
-  import org.mongodb.scala.bson.codecs.DEFAULT_CODEC_REGISTRY
+  import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
   import org.mongodb.scala.bson.codecs.Macros._
 
   val codecRegistry = fromRegistries(fromProviders(classOf[User]), DEFAULT_CODEC_REGISTRY)

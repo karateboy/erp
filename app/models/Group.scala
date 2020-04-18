@@ -13,7 +13,7 @@ case class Group(_id: String, name:String)
 class GroupOps @Inject()(mongoDB: MongoDB) {
 
   import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
-  import org.mongodb.scala.bson.codecs.DEFAULT_CODEC_REGISTRY
+  import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
   import org.mongodb.scala.bson.codecs.Macros._
 
   val codecRegistry = fromRegistries(fromProviders(classOf[Group]), DEFAULT_CODEC_REGISTRY)
