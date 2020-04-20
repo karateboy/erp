@@ -50,7 +50,7 @@ export default {
     ) {
       this.pageView = "document";
     } else {
-      this.pageView = "invalid";
+      this.pageView = "list";
     }
   }
 };

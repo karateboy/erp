@@ -37,4 +37,7 @@ GET     /imageParam       controllers.HomeController.getImageParams(idList: Stri
 POST    /doc/image/:docId controllers.HomeController.attachImageToDoc(docId)
 
 #JDB
-GET     /Customer         controllers.JdbController.listCustomer
+GET     /customer         controllers.JdbController.listCustomer
+GET     /product          controllers.JdbController.listProduct
+GET     /order            controllers.JdbController.listOrder
+GET     /work            controllers.JdbController.listWork

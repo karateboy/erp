@@ -76,9 +76,14 @@ const mutations = {
 const actions = {
     FETCH_LIST({ commit }, db) {
         moduleApi.list(db, "")
-            .then(response => {
-                commit('SET_LIST', response.data);
-            })
+        .then(response => {
+            let productList = []
+            for (let c of response.data) {
+                let product = JSON.parse(c)
+                productList.push(product)
+            }
+            commit('SET_LIST', productList);
+        })
     },
     FETCH_FILTERED_LIST({ commit }, db) {
         console.log(db);

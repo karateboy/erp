@@ -158,7 +158,7 @@ export default {
   },
   mounted() {
     console.log("Fetch Document", this.$route.path);
-    this.$store.dispatch(namespaced + "/FETCH_DOCUMENT", this.$route.path);
+    this.$store.dispatch(namespaced + "/FETCH_DOCUMENT", "/order");
   },
   methods: {
     ...mapActions(namespaced, ["FETCH_DOCUMENT"])

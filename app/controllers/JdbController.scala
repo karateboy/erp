@@ -22,11 +22,33 @@ import scala.concurrent.Future
  * application's home page.
  */
 @Singleton
-class JdbController @Inject()(cc: ControllerComponents, customerOps: CustomerOps)
+class JdbController @Inject()(cc: ControllerComponents, customerOps: CustomerOps, productOps: ProductOps,
+                             orderOps: OrderOps, workOps:WorkOps)
                              (implicit assetsFinder: AssetsFinder) extends Authentication(cc) {
 
   def listCustomer() = Authenticated.async {
     for (ret <- customerOps.list()) yield {
+      val jsons = ret.map {doc => doc.toJson()}
+      Ok(Json.toJson(jsons))
+    }
+  }
+
+  def listProduct() = Authenticated.async {
+    for (ret <- productOps.list()) yield {
+      val jsons = ret.map {doc => doc.toJson()}
+      Ok(Json.toJson(jsons))
+    }
+  }
+
+  def listOrder() = Authenticated.async {
+    for (ret <- orderOps.list()) yield {
+      val jsons = ret.map {doc => doc.toJson()}
+      Ok(Json.toJson(jsons))
+    }
+  }
+
+  def listWork() = Authenticated.async {
+    for (ret <- workOps.list()) yield {
       val jsons = ret.map {doc => doc.toJson()}
       Ok(Json.toJson(jsons))
     }

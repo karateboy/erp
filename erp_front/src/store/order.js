@@ -29,9 +29,9 @@ const namespaced = true;
 
 const state = {
     list: [],
-    filtered_list:[],
-    appDocument:[],
-    newOrders:[]
+    filtered_list: [],
+    appDocument: [],
+    newOrders: []
 };
 
 const getters = {
@@ -78,14 +78,19 @@ const mutations = {
         // for(let item of data){
         //    state.appDocument.push(item)
         // }
-     },
+    },
 };
 
 const actions = {
     FETCH_LIST({ commit }, db) {
         moduleApi.list(db, "")
             .then(response => {
-                commit('SET_LIST', response.data);
+                let productList = []
+                for (let c of response.data) {
+                    let product = JSON.parse(c)
+                    productList.push(product)
+                }
+                commit('SET_LIST', productList);
             })
     },
     FETCH_FILTERED_LIST({ commit }, db) {
