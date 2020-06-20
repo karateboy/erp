@@ -16,7 +16,7 @@
           </b-button>
           <b-collapse id="nav-collapse" is-nav>
             <b-navbar-nav>
-              <b-nav-item to="Customer">Customer</b-nav-item>
+              <b-nav-item to="customer">Customer</b-nav-item>
               <b-nav-item to="product">Product</b-nav-item>
               <b-nav-item to="order">Order</b-nav-item>
               <b-nav-item to="work">Work</b-nav-item>

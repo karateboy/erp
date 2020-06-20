@@ -49,8 +49,7 @@ const actions = {
         .then(response => {
             let productList = []
             for (let c of response.data) {
-                let product = JSON.parse(c)
-                productList.push(product)
+                productList.push(c)
             }
             commit('SET_LIST', productList);
         })

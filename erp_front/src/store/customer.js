@@ -91,8 +91,7 @@ const actions = {
             .then(response => {
                 let customerList = []                
                 for (let c of response.data) {
-                    let customer = JSON.parse(c)
-                    customerList.push(customer)
+                    customerList.push(c)
                 }
                 commit('SET_LIST', customerList);
             })

@@ -35,21 +35,21 @@ class JdbController @Inject()(cc: ControllerComponents, customerOps: CustomerOps
 
   def listProduct() = Authenticated.async {
     for (ret <- productOps.list()) yield {
-      val jsons = ret.map {doc => doc.toJson()}
+      val jsons: Seq[JsValue] = ret.map { doc => Json.parse(doc.toJson)}
       Ok(Json.toJson(jsons))
     }
   }
 
   def listOrder() = Authenticated.async {
     for (ret <- orderOps.list()) yield {
-      val jsons = ret.map {doc => doc.toJson()}
+      val jsons = ret.map {doc => Json.parse(doc.toJson)}
       Ok(Json.toJson(jsons))
     }
   }
 
   def listWork() = Authenticated.async {
     for (ret <- workOps.list()) yield {
-      val jsons = ret.map {doc => doc.toJson()}
+      val jsons = ret.map {doc => Json.parse(doc.toJson)}
       Ok(Json.toJson(jsons))
     }
   }
